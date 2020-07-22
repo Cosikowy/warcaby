@@ -40,7 +40,9 @@ class Board:
         # self.board[5][4] = Stone(5,4,'white','normal')
         # self.board[5][6] = Stone(5,6,'white','normal')
 
+        self.board[4][5] = Stone(4,5,'black','normal')
         self.board[4][3] = Stone(4,3,'black','normal')
+
         self.board[3][2] = Stone(3,2,'white','normal')
 
         self.player1 = 'p1'
@@ -103,15 +105,17 @@ class Stone:
         if self.color == 'white' and self.mode == 'queen':
             self.name = 'WQ'
 
-    def make_move(self, new_pos, game, turn):
-        if game.board[self.row][self.col].name==self.name and game.turn == self.color:
+    def make_move(self, new_pos, game):
+        attacked = False
+        if game.turn == self.color:
+
             validation, event_place, new_pos, event = self.validate_move(self.pos, new_pos, self.mode, game, self.color)
-            
             if validation:
                 if event:
                     print('Event: ', event)
                     if event=='delete':
                         game.board[event_place[1]][event_place[0]] = BlankSpace()
+                        attacked = True
 
 
                 print('color: ', self.color)
@@ -128,8 +132,14 @@ class Stone:
                 else:
                     game.turn = 'white'
             else:
+                if event:
+                    print('Event: ', event)
                 print('not validated')
-        return game
+        else:
+            print('wrong color')
+        
+        return game, attacked, new_pos
+
 
     def update_pos(self, new_pos):
         self.row = new_pos[1]
@@ -142,7 +152,7 @@ class Stone:
             if isinstance(game.board[old_pos[1]-1][old_pos[0]+1],BlankSpace): # up/right
                 enviroment[(old_pos[0]+1,old_pos[1]-1)] = ((old_pos[0]+1,old_pos[1]-1), None)
             else:
-                if game.board[old_pos[1]-1][old_pos[0]+1]!=color:
+                if game.board[old_pos[1]-1][old_pos[0]+1]!=color and isinstance(game.board[old_pos[1]-1][old_pos[0]+1], BlankSpace):
                     enviroment[(old_pos[0]+1,old_pos[1]-1)] = ((old_pos[0]+2,old_pos[1]-2), 'delete')
         except IndexError:
             pass
@@ -151,7 +161,7 @@ class Stone:
             if isinstance(game.board[old_pos[1]-1][old_pos[0]-1],BlankSpace): # up/left
                 enviroment[(old_pos[0]-1,old_pos[1]-1)] = ((old_pos[0]-1,old_pos[1]-1), None)
             else:
-                if game.board[old_pos[1]-1][old_pos[0]+1]!=color:
+                if game.board[old_pos[1]-1][old_pos[0]-1]!=color and isinstance(game.board[old_pos[1]-2][old_pos[0]-2], BlankSpace):
                     enviroment[(old_pos[0]-1,old_pos[1]-1)] = ((old_pos[0]-2,old_pos[1]-2), 'delete')
         except IndexError:
             pass
@@ -160,7 +170,7 @@ class Stone:
             if isinstance(game.board[old_pos[1]+1][old_pos[0]+1],BlankSpace): # down/right
                 enviroment[(old_pos[0]+1,old_pos[1]+1)] = ((old_pos[0]+1,old_pos[1]+1), None)
             else:
-                if game.board[old_pos[1]-1][old_pos[0]+1]!=color:
+                if game.board[old_pos[1]+1][old_pos[0]+1]!=color and isinstance(game.board[old_pos[1]+2][old_pos[0]+2], BlankSpace):
                     enviroment[(old_pos[0]+1,old_pos[1]+1)] = ((old_pos[0]+2,old_pos[1]+2), 'delete')
         except IndexError:
             pass
@@ -169,7 +179,7 @@ class Stone:
             if isinstance(game.board[old_pos[1]+1][old_pos[0]-1],BlankSpace): # down/left
                 enviroment[(old_pos[0]-1,old_pos[1]+1)] = ((old_pos[0]-1,old_pos[1]+1), None)
             else:
-                if game.board[old_pos[1]-1][old_pos[0]+1]!=color:
+                if game.board[old_pos[1]+1][old_pos[0]-1]!=color and isinstance(game.board[old_pos[1]+2][old_pos[0]-2], BlankSpace):
                     enviroment[(old_pos[0]-1,old_pos[1]+1)] = ((old_pos[0]-2,old_pos[1]+2), 'delete')
         except IndexError:
             pass
@@ -185,6 +195,19 @@ class Stone:
 
             possible_moves = self.stone_enviroment(old_pos,game, color)
             print('possible moves: ', possible_moves)
+            priority_moves = {}
+            for key, value in possible_moves.items():
+                if possible_moves[key][1] == 'delete':
+                    priority_moves[key] = value
+            
+            print('priority moves: ', priority_moves)
+            
+            if priority_moves.keys():
+                if new_pos in priority_moves.keys():
+                    return True, new_pos, possible_moves[new_pos][0], possible_moves[new_pos][1]
+                else:
+                    return False, None, None, 'attack is required'
+            
             if new_pos in possible_moves.keys():
                 if possible_moves[new_pos][1] is None:
                     if color == 'white':
@@ -232,9 +255,26 @@ while True:
     selected = b.board[old_pos[1]][old_pos[0]]
 
     if isinstance(selected, Stone):
-        b = b.board[old_pos[1]][old_pos[0]].make_move(new_pos, b, 'w')
+        b, attacked, new_pos = b.board[old_pos[1]][old_pos[0]].make_move(new_pos, b)
+        print(attacked)
+        if attacked:
+            possible_attack = False
+            enviroment = selected.stone_enviroment(new_pos, b, b.turn)
+            print('otoczenie: ', enviroment)
+            for key, value in enviroment.items():
+                if value[1] == 'delete':
+                    possible_attack = True
+                    break
+            if possible_attack:
+                possible_attack = False
+                if b.turn == 'white':
+                    b.turn = 'black'
+                else:
+                    b.turn = 'white'
     else:
-        print('U picked blak space')
+        print('U picked blank space')
+
+
 
     b.draw_board()
 
