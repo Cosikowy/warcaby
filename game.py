@@ -14,31 +14,34 @@ class Board:
 
         self.board = [[BlankSpace() for x in range(8)] for _ in range(rows)]
 
-        self.board[0][1] = Stone(0,1,'black','normal')
-        self.board[0][3] = Stone(0,3,'black','normal')
-        self.board[0][5] = Stone(0,5,'black','normal')
-        self.board[0][7] = Stone(0,7,'black','normal')
-        self.board[1][0] = Stone(1,0,'black','normal')
-        self.board[1][2] = Stone(1,2,'black','normal')
-        self.board[1][4] = Stone(1,4,'black','normal')
-        self.board[1][6] = Stone(1,6,'black','normal')
-        self.board[2][1] = Stone(2,1,'black','normal')
-        self.board[2][3] = Stone(2,3,'black','normal')
-        self.board[2][5] = Stone(2,5,'black','normal')
-        self.board[2][7] = Stone(2,7,'black','normal')
+        # self.board[0][1] = Stone(0,1,'black','normal')
+        # self.board[0][3] = Stone(0,3,'black','normal')
+        # self.board[0][5] = Stone(0,5,'black','normal')
+        # self.board[0][7] = Stone(0,7,'black','normal')
+        # self.board[1][0] = Stone(1,0,'black','normal')
+        # self.board[1][2] = Stone(1,2,'black','normal')
+        # self.board[1][4] = Stone(1,4,'black','normal')
+        # self.board[1][6] = Stone(1,6,'black','normal')
+        # self.board[2][1] = Stone(2,1,'black','normal')
+        # self.board[2][3] = Stone(2,3,'black','normal')
+        # self.board[2][5] = Stone(2,5,'black','normal')
+        # self.board[2][7] = Stone(2,7,'black','normal')
 
-        self.board[7][0] = Stone(7,0,'white','normal')
-        self.board[7][2] = Stone(7,2,'white','normal')
-        self.board[7][4] = Stone(7,4,'white','normal')
-        self.board[7][6] = Stone(7,6,'white','normal')
-        self.board[6][1] = Stone(6,1,'white','normal')
-        self.board[6][3] = Stone(6,3,'white','normal')
-        self.board[6][5] = Stone(6,5,'white','normal')
-        self.board[6][7] = Stone(6,7,'white','normal')
-        self.board[5][0] = Stone(5,0,'white','normal')
-        self.board[5][2] = Stone(5,2,'white','normal')
-        self.board[5][4] = Stone(5,4,'white','normal')
-        self.board[5][6] = Stone(5,6,'white','normal')
+        # self.board[7][0] = Stone(7,0,'white','normal')
+        # self.board[7][2] = Stone(7,2,'white','normal')
+        # self.board[7][4] = Stone(7,4,'white','normal')
+        # self.board[7][6] = Stone(7,6,'white','normal')
+        # self.board[6][1] = Stone(6,1,'white','normal')
+        # self.board[6][3] = Stone(6,3,'white','normal')
+        # self.board[6][5] = Stone(6,5,'white','normal')
+        # self.board[6][7] = Stone(6,7,'white','normal')
+        # self.board[5][0] = Stone(5,0,'white','normal')
+        # self.board[5][2] = Stone(5,2,'white','normal')
+        # self.board[5][4] = Stone(5,4,'white','normal')
+        # self.board[5][6] = Stone(5,6,'white','normal')
+
+        self.board[4][3] = Stone(4,3,'black','normal')
+        self.board[3][2] = Stone(3,2,'white','normal')
 
         self.player1 = 'p1'
         self.player2 = 'p2'
@@ -88,7 +91,7 @@ class Stone:
         self.mode = mode
         self.row = row
         self.col = col
-        self.pos = (col, row) # (y,x) cords
+        self.pos = (col, row)
 
 
         if self.color == 'black' and self.mode == 'normal':
@@ -102,7 +105,15 @@ class Stone:
 
     def make_move(self, new_pos, game, turn):
         if game.board[self.row][self.col].name==self.name and game.turn == self.color:
-            if self.validate_move(self.pos, new_pos, self.mode, game.board, self.color):
+            validation, event_place, new_pos, event = self.validate_move(self.pos, new_pos, self.mode, game, self.color)
+            
+            if validation:
+                if event:
+                    print('Event: ', event)
+                    if event=='delete':
+                        game.board[event_place[1]][event_place[0]] = BlankSpace()
+
+
                 print('color: ', self.color)
                 print('ok validated')
 
@@ -125,39 +136,82 @@ class Stone:
         self.col = new_pos[0]
         self.pos = (self.col, self.row)  # (y,x) cords
 
-    def validate_move(self, old_pos, new_pos, stone_type, board, color):
+    def stone_enviroment(self, old_pos, game, color):
+        enviroment = {}
+        try:
+            if isinstance(game.board[old_pos[1]-1][old_pos[0]+1],BlankSpace): # up/right
+                enviroment[(old_pos[0]+1,old_pos[1]-1)] = ((old_pos[0]+1,old_pos[1]-1), None)
+            else:
+                if game.board[old_pos[1]-1][old_pos[0]+1]!=color:
+                    enviroment[(old_pos[0]+1,old_pos[1]-1)] = ((old_pos[0]+2,old_pos[1]-2), 'delete')
+        except IndexError:
+            pass
+
+        try:
+            if isinstance(game.board[old_pos[1]-1][old_pos[0]-1],BlankSpace): # up/left
+                enviroment[(old_pos[0]-1,old_pos[1]-1)] = ((old_pos[0]-1,old_pos[1]-1), None)
+            else:
+                if game.board[old_pos[1]-1][old_pos[0]+1]!=color:
+                    enviroment[(old_pos[0]-1,old_pos[1]-1)] = ((old_pos[0]-2,old_pos[1]-2), 'delete')
+        except IndexError:
+            pass
+
+        try:
+            if isinstance(game.board[old_pos[1]+1][old_pos[0]+1],BlankSpace): # down/right
+                enviroment[(old_pos[0]+1,old_pos[1]+1)] = ((old_pos[0]+1,old_pos[1]+1), None)
+            else:
+                if game.board[old_pos[1]-1][old_pos[0]+1]!=color:
+                    enviroment[(old_pos[0]+1,old_pos[1]+1)] = ((old_pos[0]+2,old_pos[1]+2), 'delete')
+        except IndexError:
+            pass
+
+        try:
+            if isinstance(game.board[old_pos[1]+1][old_pos[0]-1],BlankSpace): # down/left
+                enviroment[(old_pos[0]-1,old_pos[1]+1)] = ((old_pos[0]-1,old_pos[1]+1), None)
+            else:
+                if game.board[old_pos[1]-1][old_pos[0]+1]!=color:
+                    enviroment[(old_pos[0]-1,old_pos[1]+1)] = ((old_pos[0]-2,old_pos[1]+2), 'delete')
+        except IndexError:
+            pass
+        return enviroment
+
+    def validate_move(self, old_pos, new_pos, stone_type, game, color):
+
         print('old pos:', old_pos)
         print('new pos:', new_pos)
-        
+        possible_moves = []
+        effect = []
         if stone_type=='normal':
 
-            if color == 'white':
-                # LEFT / RIGHR + UP
-                if old_pos[0]-new_pos[0] == 1 or old_pos[0]-new_pos[0] == -1:
-                    if old_pos[1]-new_pos[1] == 1:
-                        print('ok')
+            possible_moves = self.stone_enviroment(old_pos,game, color)
+            print('possible moves: ', possible_moves)
+            if new_pos in possible_moves.keys():
+                if possible_moves[new_pos][1] is None:
+                    if color == 'white':
+                        if old_pos[1]-new_pos[1] == -1:
+                            return False, None, None, None
                     else:
-                        return False
-                else:
-                    print('not ok')
-                    return False
+                        if old_pos[1]-new_pos[1] == 1:
+                            return False, None, None, None
+
+                return True, new_pos, possible_moves[new_pos][0], possible_moves[new_pos][1]
             else:
-                # LEFT / RIGHR + DOWN
-                if old_pos[0]-new_pos[0] == 1 or old_pos[0]-new_pos[0] == -1:
-                    if old_pos[1]-new_pos[1] == -1:
-                        print('ok')
-                    else:
-                        return False
-                else:
-                    print('not ok')
-                    return False
+                return False, None, None, None
+
+
+        
         else:
             pass
 
-        if True:
-            return True
-        else:
-            return False
+        # if isinstance(board[new_pos[1]][new_pos[0]],BlankSpace):
+        #     pass
+        # else:
+        #     print('position is occupied')
+        #     return False
+        
+        #     return True
+        # else:
+        #     return False
 
     def __repr__(self):
         return self.name
@@ -184,32 +238,3 @@ while True:
 
     b.draw_board()
 
-
-
-'''
-# def translate(old_pos, new_pos, move_dict):
-    
-#     # old_tup = ()
-#     # new_tup = (new_pos[0], new_pos[1])
-#     print(old_pos)
-#     print(new_pos)
-#     old_tup = move_dict[(old_pos[0], int(old_pos[1]))]
-#     new_tup = move_dict[(new_pos[0], int(new_pos[1]))]
-#     print(old_tup)
-#     print(new_tup)
-
-# horizontal = ['a','b','c','d','e','f','g','h']
-# wertical = [1,2,3,4,5,6,7,8]
-
-# move_dict = {}
-# for x,n_x in zip(horizontal, range(8)):
-#     for y,n_y in zip(reversed(wertical), reversed(range(8))):
-#         move_dict[(x,y)] = (n_x, n_y)
-
-
-# # old_x, old_y, new_x, new_y = 
-# translate('a1', 'b2', move_dict)
-# print('old: ', old_x, ' ', old_y)
-# print('new: ', new_x, ' ', new_y)
-# pprint.pprint(move_dict)
-#'''
