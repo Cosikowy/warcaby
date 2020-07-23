@@ -41,9 +41,9 @@ class Board:
         # self.board[5][6] = Stone(5,6,'white','normal')
 
         self.board[4][7] = Stone(4,7,'black','normal')
-        self.board[4][3] = Stone(4,3,'black','normal')
+        self.board[6][1] = Stone(6,1,'black','normal')
 
-        self.board[2][1] = Stone(2,1,'white','queen')
+        self.board[1][0] = Stone(1,0,'white','normal')
 
         self.player1 = 'p1'
         self.player2 = 'p2'
@@ -67,15 +67,15 @@ class Board:
 
     def draw_board(self):
         print(
-            '   ', 'A0', 'B1', 'C2', 'D3', 'E4' , 'F5', 'G6', 'H7', '\n',
-            '08', self.board[0][0], self.board[0][1], self.board[0][2], self.board[0][3], self.board[0][4], self.board[0][5], self.board[0][6], self.board[0][7], '\n',
-            '17', self.board[1][0], self.board[1][1], self.board[1][2], self.board[1][3], self.board[1][4], self.board[1][5], self.board[1][6], self.board[1][7], '\n',
-            '26', self.board[2][0], self.board[2][1], self.board[2][2], self.board[2][3], self.board[2][4], self.board[2][5], self.board[2][6], self.board[2][7], '\n',
-            '35', self.board[3][0], self.board[3][1], self.board[3][2], self.board[3][3], self.board[3][4], self.board[3][5], self.board[3][6], self.board[3][7], '\n',
-            '44', self.board[4][0], self.board[4][1], self.board[4][2], self.board[4][3], self.board[4][4], self.board[4][5], self.board[4][6], self.board[4][7], '\n',
-            '53', self.board[5][0], self.board[5][1], self.board[5][2], self.board[5][3], self.board[5][4], self.board[5][5], self.board[5][6], self.board[5][7], '\n',
-            '62', self.board[6][0], self.board[6][1], self.board[6][2], self.board[6][3], self.board[6][4], self.board[6][5], self.board[6][6], self.board[6][7], '\n',
-            '71', self.board[7][0], self.board[7][1], self.board[7][2], self.board[7][3], self.board[7][4], self.board[7][5], self.board[7][6], self.board[7][7], '\n',
+            '  ', ' A', ' B', ' C', ' D', ' E' , ' F', 'G ', ' H', '\n',
+            '8', self.board[0][0], self.board[0][1], self.board[0][2], self.board[0][3], self.board[0][4], self.board[0][5], self.board[0][6], self.board[0][7], '\n',
+            '7', self.board[1][0], self.board[1][1], self.board[1][2], self.board[1][3], self.board[1][4], self.board[1][5], self.board[1][6], self.board[1][7], '\n',
+            '6', self.board[2][0], self.board[2][1], self.board[2][2], self.board[2][3], self.board[2][4], self.board[2][5], self.board[2][6], self.board[2][7], '\n',
+            '5', self.board[3][0], self.board[3][1], self.board[3][2], self.board[3][3], self.board[3][4], self.board[3][5], self.board[3][6], self.board[3][7], '\n',
+            '4', self.board[4][0], self.board[4][1], self.board[4][2], self.board[4][3], self.board[4][4], self.board[4][5], self.board[4][6], self.board[4][7], '\n',
+            '3', self.board[5][0], self.board[5][1], self.board[5][2], self.board[5][3], self.board[5][4], self.board[5][5], self.board[5][6], self.board[5][7], '\n',
+            '2', self.board[6][0], self.board[6][1], self.board[6][2], self.board[6][3], self.board[6][4], self.board[6][5], self.board[6][6], self.board[6][7], '\n',
+            '1', self.board[7][0], self.board[7][1], self.board[7][2], self.board[7][3], self.board[7][4], self.board[7][5], self.board[7][6], self.board[7][7], '\n',
         )
 
 
@@ -128,8 +128,16 @@ class Stone:
 
                 game.board[self.row][self.col] = BlankSpace()
                 game.board[new_pos[1]][new_pos[0]] = self
+
                 self.update_pos(new_pos)
                 self.pos = (new_pos[0],new_pos[1])
+                
+                if self.check_for_upgrade(new_pos):
+                    self.mode = 'queen'
+                    if self.color == 'white':
+                        self.name = 'WQ'
+                    else:
+                        self.name = 'BQ'
                 
                 if game.turn == 'white':
                     game.turn = 'black'
@@ -145,8 +153,17 @@ class Stone:
 
         return game, attacked, new_pos
 
-    def check_for_upgrade(self, pos, game):
-        pass
+    def check_for_upgrade(self, pos):
+        white_upgrade = [(1,0),(3,0),(5,0),(7,0)]
+        black_upgrade = [(0,7),(2,7),(4,7),(5,7)]
+        if self.color == 'white':
+            if pos in white_upgrade:
+                return True
+        else:
+            if pos in black_upgrade:
+                return True
+        
+        return False
     
     def update_pos(self, new_pos):
         self.row = new_pos[1]
