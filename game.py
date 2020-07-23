@@ -14,36 +14,32 @@ class Board:
 
         self.board = [[BlankSpace() for x in range(8)] for _ in range(rows)]
 
-        # self.board[0][1] = Stone(0,1,'black','normal')
-        # self.board[0][3] = Stone(0,3,'black','normal')
-        # self.board[0][5] = Stone(0,5,'black','normal')
-        # self.board[0][7] = Stone(0,7,'black','normal')
-        # self.board[1][0] = Stone(1,0,'black','normal')
-        # self.board[1][2] = Stone(1,2,'black','normal')
-        # self.board[1][4] = Stone(1,4,'black','normal')
-        # self.board[1][6] = Stone(1,6,'black','normal')
-        # self.board[2][1] = Stone(2,1,'black','normal')
-        # self.board[2][3] = Stone(2,3,'black','normal')
-        # self.board[2][5] = Stone(2,5,'black','normal')
-        # self.board[2][7] = Stone(2,7,'black','normal')
+        self.board[0][1] = Stone(0,1,'black','normal')
+        self.board[0][3] = Stone(0,3,'black','normal')
+        self.board[0][5] = Stone(0,5,'black','normal')
+        self.board[0][7] = Stone(0,7,'black','normal')
+        self.board[1][0] = Stone(1,0,'black','normal')
+        self.board[1][2] = Stone(1,2,'black','normal')
+        self.board[1][4] = Stone(1,4,'black','normal')
+        self.board[1][6] = Stone(1,6,'black','normal')
+        self.board[2][1] = Stone(2,1,'black','normal')
+        self.board[2][3] = Stone(2,3,'black','normal')
+        self.board[2][5] = Stone(2,5,'black','normal')
+        self.board[2][7] = Stone(2,7,'black','normal')
 
-        # self.board[7][0] = Stone(7,0,'white','normal')
-        # self.board[7][2] = Stone(7,2,'white','normal')
-        # self.board[7][4] = Stone(7,4,'white','normal')
-        # self.board[7][6] = Stone(7,6,'white','normal')
-        # self.board[6][1] = Stone(6,1,'white','normal')
-        # self.board[6][3] = Stone(6,3,'white','normal')
-        # self.board[6][5] = Stone(6,5,'white','normal')
-        # self.board[6][7] = Stone(6,7,'white','normal')
-        # self.board[5][0] = Stone(5,0,'white','normal')
-        # self.board[5][2] = Stone(5,2,'white','normal')
-        # self.board[5][4] = Stone(5,4,'white','normal')
-        # self.board[5][6] = Stone(5,6,'white','normal')
+        self.board[7][0] = Stone(7,0,'white','normal')
+        self.board[7][2] = Stone(7,2,'white','normal')
+        self.board[7][4] = Stone(7,4,'white','normal')
+        self.board[7][6] = Stone(7,6,'white','normal')
+        self.board[6][1] = Stone(6,1,'white','normal')
+        self.board[6][3] = Stone(6,3,'white','normal')
+        self.board[6][5] = Stone(6,5,'white','normal')
+        self.board[6][7] = Stone(6,7,'white','normal')
+        self.board[5][0] = Stone(5,0,'white','normal')
+        self.board[5][2] = Stone(5,2,'white','normal')
+        self.board[5][4] = Stone(5,4,'white','normal')
+        self.board[5][6] = Stone(5,6,'white','normal')
 
-        self.board[4][7] = Stone(4,7,'black','normal')
-        self.board[6][1] = Stone(6,1,'black','normal')
-
-        self.board[1][0] = Stone(1,0,'white','normal')
 
         self.player1 = 'p1'
         self.player2 = 'p2'
@@ -355,44 +351,44 @@ class Stone:
 
 
 
-b = Board(8,8)
 
-b.draw_board()
-
-
-while True:
-    print('Turn: ', b.turn)
-    old_pos = input('Pick stone: ')
-    new_pos = input("What's ur move? ")
-    old_pos, new_pos = b.decode_move(old_pos, new_pos)
-    selected = b.board[old_pos[1]][old_pos[0]]
-
-
-    if isinstance(selected, Stone):
-        b, attacked, new_pos = b.board[old_pos[1]][old_pos[0]].make_move(new_pos, b)
-        print('new_pos_2: ',new_pos)
-        if attacked:
-            possible_attack = False
-            if selected.mode =='normal':
-                enviroment = selected.stone_enviroment(new_pos, b, b.turn)
-            else:
-                enviroment, _ = selected.queen_enviroment(new_pos, b, b.turn)
-            print('otoczenie: ', enviroment)
-            for key, value in enviroment.items():
-                if value[1] == 'delete':
-                    possible_attack = True
-                    break
-            print('Possible attack: ', possible_attack)
-            if possible_attack:
-                possible_attack = False
-                if b.turn == 'white':
-                    b.turn = 'black'
-                else:
-                    b.turn = 'white'
-    else:
-        print('U picked blank space')
-
+def run_game():
+    b = Board(8,8)
 
     b.draw_board()
+    while True:
+        print('Turn: ', b.turn)
+        old_pos = input('Pick stone: ')
+        new_pos = input("What's ur move? ")
+        old_pos, new_pos = b.decode_move(old_pos, new_pos)
+        selected = b.board[old_pos[1]][old_pos[0]]
+
+
+        if isinstance(selected, Stone):
+            b, attacked, new_pos = b.board[old_pos[1]][old_pos[0]].make_move(new_pos, b)
+            print('new_pos_2: ',new_pos)
+            if attacked:
+                possible_attack = False
+                if selected.mode =='normal':
+                    enviroment = selected.stone_enviroment(new_pos, b, b.turn)
+                else:
+                    enviroment, _ = selected.queen_enviroment(new_pos, b, b.turn)
+                print('otoczenie: ', enviroment)
+                for key, value in enviroment.items():
+                    if value[1] == 'delete':
+                        possible_attack = True
+                        break
+                print('Possible attack: ', possible_attack)
+                if possible_attack:
+                    possible_attack = False
+                    if b.turn == 'white':
+                        b.turn = 'black'
+                    else:
+                        b.turn = 'white'
+        else:
+            print('U picked blank space')
+
+
+        b.draw_board()
 
 
