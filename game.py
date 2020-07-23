@@ -78,6 +78,12 @@ class Board:
         new_tup = self.move_dict[(new_pos[0], int(new_pos[1]))]
         return old_tup, new_tup
 
+    def stones(self):
+        for x, _ in enumerate(self.board):
+            for y, _ in enumerate(self.board[0]):
+                if isinstance(self.board[x][y], Stone):
+                    yield self.board[x][y]
+
     def draw_board(self):
         print(
             '  ', ' A', ' B', ' C', ' D', ' E' , ' F', 'G ', ' H', '\n',
@@ -130,11 +136,9 @@ class Stone:
             validation, event_place, new_pos, event = self.validate_move(self.pos, new_pos, self.mode, game, self.color)
             if validation:
                 if event:
-                    print('Event: ', event)
                     if event=='delete':
                         game.board[event_place[1]][event_place[0]] = BlankSpace()
                         attacked = True
-                print('ok validated')
                 game.board[self.row][self.col] = BlankSpace()
                 game.board[new_pos[1]][new_pos[0]] = self
                 self.update_pos(new_pos)
@@ -150,12 +154,10 @@ class Stone:
                 else:
                     game.turn = 'white'
             else:
-                if event:
-                    print('Event: ', event)
-                print('not validated')
+                event = 'Wrong move'
         else:
-            print('wrong color')
-        return game, attacked, new_pos
+            event = 'Wrong color'
+        return game, attacked, new_pos, event
 
 
     def check_for_upgrade(self, pos):
@@ -173,7 +175,7 @@ class Stone:
     def update_pos(self, new_pos):
         self.row = new_pos[1]
         self.col = new_pos[0]
-        self.pos = (self.col, self.row)  # (y,x) cords
+        self.pos = (new_pos[1], new_pos[0])
 
 
     def stone_enviroment(self, old_pos, game, color):
@@ -292,18 +294,25 @@ class Stone:
 
 
     def validate_move(self, old_pos, new_pos, stone_type, game, color):
-        print('old pos:', old_pos)
-        print('new pos:', new_pos)
         possible_moves = []
         effect = []
+        all_possible_moves = []
+        for stone in game.stones():
+            if stone.mode == 'normal' and stone.color == color:
+                all_possible_moves.append(stone.stone_enviroment(stone.pos, game, color))
+            elif stone.mode == 'normal' and stone.color == color:
+                all_possible_moves.append(stone.queen_enviroment(stone.pos, game, color))
+        
+        priority_moves = {}
+        for moves in all_possible_moves:
+            if moves.keys():
+                for key, value in moves.items():
+                    if moves[key][1] == 'delete':
+                        priority_moves[key] = value
+
+
         if stone_type=='normal':
             possible_moves = self.stone_enviroment(old_pos,game, color)
-            print('possible moves: ', possible_moves)
-            priority_moves = {}
-            for key, value in possible_moves.items():
-                if possible_moves[key][1] == 'delete':
-                    priority_moves[key] = value
-            print('priority moves: ', priority_moves)
             if priority_moves.keys():
                 if new_pos in priority_moves.keys():
                     return True, new_pos, possible_moves[new_pos][0], possible_moves[new_pos][1]
@@ -322,12 +331,10 @@ class Stone:
                 return False, None, None, None
         else:
             possible_moves, attacked_at = selected.queen_enviroment(old_pos, game, game.turn)
-            print('possible moves: ', possible_moves)
             priority_moves = {}
             for key, value in possible_moves.items():
                 if possible_moves[key][1] == 'delete':
                     priority_moves[key] = value
-            print('priority moves', priority_moves)
             if priority_moves.keys():
                 if new_pos in priority_moves.keys():
                     return True, attacked_at, possible_moves[new_pos][0], possible_moves[new_pos][1]
@@ -339,47 +346,86 @@ class Stone:
     def __repr__(self):
         return self.name
 
-def run_game():
-    b = Board(8,8)
 
-    b.draw_board()
-    while True:
-        print('Turn: ', b.turn)
-        old_pos = input('Pick stone: ')
-        new_pos = input("What's ur move? ")
-        old_pos, new_pos = b.decode_move(old_pos, new_pos)
-        selected = b.board[old_pos[1]][old_pos[0]]
-        if isinstance(selected, Stone):
-            b, attacked, new_pos = b.board[old_pos[1]][old_pos[0]].make_move(new_pos, b)
-            print('new_pos_2: ',new_pos)
-            if attacked:
-                possible_attack = False
-                if selected.mode =='normal':
-                    enviroment = selected.stone_enviroment(new_pos, b, b.turn)
-                else:
-                    enviroment, _ = selected.queen_enviroment(new_pos, b, b.turn)
-                print('otoczenie: ', enviroment)
-                for key, value in enviroment.items():
-                    if value[1] == 'delete':
-                        possible_attack = True
-                        break
-                print('Possible attack: ', possible_attack)
-                if possible_attack:
-                    possible_attack = False
-                    if b.turn == 'white':
-                        b.turn = 'black'
-                    else:
-                        b.turn = 'white'
-        else:
-            print('U picked blank space')
-        # os.system('cls')
-        b.draw_board()
+class Game:
+    
+    def __init__(self):
+        self.ID = ''
+    
+    def validate_input(self, _input):
+        try:
+            old = _input.split(',')[0]
+            new = _input.split(',')[1]
+            horizontal = ['a','b','c','d','e','f','g','h'] 
+            wertical = [1,2,3,4,5,6,7,8]
+            
+            if old[0] not in horizontal:
+                return False
+            if int(old[1]) not in wertical:
+                return False
+            if new[0] not in horizontal:
+                return False
+            if int(new[1]) not in wertical:
+                return False
+            return True
         
-        winner_check, winner = b.winner()
+        except:
+            return False
 
-        if winner_check:
-            return winner
+    def run_game(self):
+        b = Board(8,8)
+        event = None
+        while True:
+            os.system('cls')
+            b.draw_board()
+            if event:
+                print(event)
+            print('Turn: ', b.turn)
+            move = input("What's ur move? ")
+            if self.validate_input(move):
+
+                old_pos = move.split(',')[0]
+                new_pos = move.split(',')[1]
+                picked_stone = move.split(',')[0]
+                destination = move.split(',')[1]
+                old_pos, new_pos = b.decode_move(old_pos, new_pos)
+                selected = b.board[old_pos[1]][old_pos[0]]
+                if isinstance(selected, Stone):
+                    b, attacked, new_pos, move_event = b.board[old_pos[1]][old_pos[0]].make_move(new_pos, b)
+                    if attacked:
+                        if move_event == 'deleted':
+                            event = f'Attacked at {destination}'
+                        possible_attack = False
+                        if selected.mode =='normal':
+                            enviroment = selected.stone_enviroment(selected.pos, b, b.turn)
+                        else:
+                            enviroment, _ = selected.queen_enviroment(selected.pos, b, b.turn)
+                        for key, value in enviroment.items():
+                            if value[1] == 'delete':
+                                possible_attack = True
+                                break
+                        if possible_attack:
+                            possible_attack = False
+                            if b.turn == 'white':
+                                b.turn = 'black'
+                            else:
+                                b.turn = 'white'
+                    else:
+                        event = f'Moved to {destination}'
+                else:
+                    event = 'You picked blank space'
+            else:
+                event = 'Wrong move'
+
+
+                winner_check, winner = b.winner()
+
+                if winner_check:
+                    return winner
 
 
 
-run_game()
+game1 = Game()
+
+game1.run_game()
+
