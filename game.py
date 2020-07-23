@@ -143,12 +143,6 @@ class Stone:
                 game.board[new_pos[1]][new_pos[0]] = self
                 self.update_pos(new_pos)
                 self.pos = (new_pos[0],new_pos[1])
-                if self.check_for_upgrade(new_pos):
-                    self.mode = 'queen'
-                    if self.color == 'white':
-                        self.name = 'WQ'
-                    else:
-                        self.name = 'BQ'
                 if game.turn == 'white':
                     game.turn = 'black'
                 else:
@@ -412,6 +406,12 @@ class Game:
                                 b.turn = 'white'
                     else:
                         event = f'Moved to {destination}'
+                    if selected.check_for_upgrade(new_pos):
+                        selected.mode = 'queen'
+                        if selected.color == 'white':
+                            selected.name = 'WQ'
+                        else:
+                            selected.name = 'BQ'
                 else:
                     event = 'You picked blank space'
             else:
@@ -422,6 +422,7 @@ class Game:
 
                 if winner_check:
                     return winner
+
 
 
 
