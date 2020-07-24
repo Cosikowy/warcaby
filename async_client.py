@@ -16,7 +16,10 @@ async def wait_for_data():
     while connected:
         msg = input('msg: ')
 
-        send_dict = {'name':name, 'msg':msg}
+        send_dict = {
+            'name':name,
+            'msg':msg
+            }
         message = json.dumps(send_dict)
         loop.call_soon(client.send, message.encode())
 

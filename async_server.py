@@ -23,7 +23,7 @@ async def handle_connection(reader, writer):
         for player in players.keys():
             if player!=msg_json['name']:
                 writer2 = players[player]
-                writer2.write(data)
+                writer2.write(data)                 # Ta część jest jak będzie już 2 graczy w lobby
                 await writer2.drain()
             if msg_json['msg']=='close':
                 writer2 = players[player]
