@@ -1,6 +1,7 @@
 import asyncio
 import socket
 import json
+import pickle
 
 async def wait_for_data():
     loop = asyncio.get_running_loop()
@@ -13,9 +14,12 @@ async def wait_for_data():
     
     connected = True
     name = input('name: ')
+    # game_state = 'Game State v1'
     while connected:
+        print('board')
+        print('Your move')
         msg = input('msg: ')
-
+        print('board_updated')
         send_dict = {
             'name':name,
             'msg':msg
@@ -23,16 +27,25 @@ async def wait_for_data():
         message = json.dumps(send_dict)
         loop.call_soon(client.send, message.encode())
 
+        print("Waiting for oponent's move")
         data = await reader.read(2048)
+        # print(game_state)
 
+        # print("Oponent's move:", data.decode())
+        # loop.call_soon(client.send, 'sync'.encode())
         if send_dict['msg'] == 'close':
             writer.close()
             client.close()
             connected = False
         else:
-            data = await reader.read(2048)
+            sync = await reader.read(2048)
+        
+        print('board_synced, data recived 1st turn:', data)
+        print("Oponent's move:", sync.decode())
 
-        print("Received:", data.decode())
+        # loop.call_soon(client.send, 'awaiting'.encode())
+        # awaiting = await reader.read(2048)
+        
         if msg == 'close':
             writer.close()
             client.close()

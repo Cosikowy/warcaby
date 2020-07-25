@@ -1,6 +1,7 @@
 import asyncio
 import json
 import ast
+import pickle
 
 
 async def handle_connection(reader, writer):
@@ -9,7 +10,9 @@ async def handle_connection(reader, writer):
     while True:
 
         data = await reader.read(2048)
+        # data2 = data
         message = data.decode()
+
         msg_json = json.loads(message)
         addr = writer.get_extra_info('peername')
 
@@ -30,10 +33,12 @@ async def handle_connection(reader, writer):
                 writer2.write(data)
                 await writer2.drain()
         
+        # sync = await reader.read(2048)
+        # sync = sync.decode()
         writer.write(data)
         await writer.drain()
-        
-        
+
+
         if message == '':
             print("Connection lost")
             writer.close()
