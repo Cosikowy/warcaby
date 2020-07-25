@@ -68,13 +68,14 @@ class Server:
             data = await reader.read(2048)
             message = data.decode()
             msg_json = json.loads(message)
-            
-            print('ping')
             while incorrect_name:
                 if msg_json['player_status']!='existing':
                     if msg_json['player_status'] == 'new' and msg_json['name'] not in self.players.keys():
                         self.players[msg_json['name']] = writer
                         incorrect_name = False
+                        return_msg = 'ok'.encode()
+                        writer.write(return_msg)
+                        await writer.drain()
                     elif msg_json['player_status'] == 'new' and msg_json['name'] in self.players.keys():
                         print('naming went wrong')
                         return_msg = 'Name already used!'.encode()
@@ -87,76 +88,97 @@ class Server:
                         incorrect_name = False
             if msg_json['name'] not in self.players.keys():
                 self.players[msg_json['name']] = writer
+            print(msg_json)
+            if msg_json['command'] == 'new game':
                 
+                # message = data.decode()
+                self.response_to_player(msg_json['name'], {'msg': 'ok'})
+                if msg_json['game_id']=='':
+                    print('game_creation')
+                    self.queue.append(msg_json['name'])
+                    if len(self.queue)==2:
+                        game_id = random.randint(1000,9999)
+                        not_valid = True
+                        while not_valid:
+                            if game_id in self.running_games:
+                                game_id = random.randint(1000,9999)
+                            else:
+                                not_valid = False
+                        self.running_games.add(game_id)
+                        response['game_id'] = game_id
+                        self.lobby[game_id] = [x for x in self.queue]
+                        self.queue.clear()
+                        print(self.lobby)
+                        
+                        player_one = self.lobby[game_id][0]
+                        player_two = self.lobby[game_id][1]
+                        self.games[game_id] = {
+                            'players':(player_one, player_two),
+                            'game_id': game_id,
+                            'started': datetime.datetime.now().strftime('%Y-%m-%d_%H:%M'),
+                            'status': 'ongoing/tie'
+                        }
+                        await self.response_to_player(player_one, response)
+                        response_p2 = response
+                        response_p2['color'] = 'black'
+                        await self.response_to_player(player_two, response_p2)
+                        
+                    else:
+                        return_msg = 'wait'.encode()
+                        writer.write(return_msg)
+                        await writer.drain()
+                    print('game created')
+
+
+                elif msg_json['game_id']!='':
+                    finished = False
+                    player_one = self.lobby[msg_json['game_id']][0]
+                    player_two = self.lobby[msg_json['game_id']][1]
+                    
+                    addr = writer.get_extra_info('peername')
+                    print(f"Received {msg_json} from {msg_json['msg']} - {addr}")
+                    response['move'] = msg_json['move']
+                    print(f"Send: {response}")
+                    if 'finished' in msg_json['game_status']:
+                        response['game_status'] = msg_json['game_status']
+                        finished = True
+
+                    response = json.dumps(response).encode()
+                    self.games[msg_json['game_id']]['last move'] = datetime.datetime.now().strftime('%Y-%m-%d_%H:%M')
+                    
+                        
+                    if finished:
+                        self.games[msg_json['game_id']]['status'] = 'finished'
+                        self.running_games.discard(msg_json['game_id'])
+                        self.lobby.pop(msg_json['game_id'], None)
+                        self.players.pop(player_one, None)
+                        self.players.pop(player_two, None)
+                    if msg_json['color']=='white':
+                        await self.response_to_player(player_two, response)
+                    else:
+                        await self.response_to_player(player_one, response)
+
+
+                    response = json.loads(response.decode())
+
+
+                if message == '':
+                    print("Connection lost")
+                    writer.close()
+
+                if msg_json['msg'] == 'close':
+                    print("Close the connection")
+                    writer.close()
+            elif msg_json['command'] == 'history':
+                history = self.games
+                await self.response_to_player(msg_json['name'], history)             
             
-            if msg_json['game_id']=='':
-                print('game_creation')
-                self.queue.append(msg_json['name'])
-                if len(self.queue)==2:
-                    game_id = random.randint(1000,9999)
-                    not_valid = True
-                    while not_valid:
-                        if game_id in self.running_games:
-                            game_id = random.randint(1000,9999)
-                        else:
-                            not_valid = False
-                    response['game_id'] = game_id
-                    self.lobby[game_id] = [x for x in self.queue]
-                    self.queue.clear()
-                    print(self.lobby)
-                    
-                    player_one = self.lobby[game_id][0]
-                    player_two = self.lobby[game_id][1]
-                    self.games[game_id] = {
-                        'players':(player_one, player_two),
-                        'game_id': game_id,
-                        'started': datetime.datetime.now().strftime('%Y-%m-%d_%H:%M'),
-                        'status': 'ongoing/unfinished'
-                    }
-                    await self.response_to_player(player_one, response)
-                    response_p2 = response
-                    response_p2['color'] = 'black'
-                    await self.response_to_player(player_two, response_p2)
-
-
-                    
-                else:
-                    return_msg = 'wait'.encode()
-                    writer.write(return_msg)
-                    await writer.drain()
-                print('game created')
-
-
-            elif msg_json['game_id']!='':
-                player_one = self.lobby[msg_json['game_id']][0]
-                player_two = self.lobby[msg_json['game_id']][1]
-                
-                print('ping2')
-
-                addr = writer.get_extra_info('peername')
-                print(f"Received {msg_json} from {msg_json['msg']} - {addr}")
-                response['move'] = msg_json['move']
-                print(f"Send: {response}")
-                
-                response = json.dumps(response).encode()
-                # self.games[msg_json['game_id']]['last move'] = datetime.datetime.now('%Y_%m_%d')
-                if msg_json['color']=='white':
-                    await self.response_to_player(player_two, response)
-                else:
-                    await self.response_to_player(player_one, response)
-
-
-                response = json.loads(response.decode())
-
-
-
-
-            if message == '':
-                print("Connection lost")
-                writer.close()
-
-            if msg_json['msg'] == 'close':
-                print("Close the connection")
-                writer.close()
+            elif msg_json['command'] == 'currently playing':
+                curr_players = str([', '.join(x for x in self.players.keys())])
+                await self.response_to_player(msg_json['name'], curr_players)
+            elif msg_json['command'] == 'games':
+                games = self.games
+                games = str([', '.join(x for x in self.games)])
+                await self.response_to_player(msg_json['name'], games)
 
 Server()

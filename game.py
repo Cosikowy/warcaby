@@ -13,7 +13,7 @@ class Board:
         self.ready = False
         self.last = None
 
-        self.board = [[BlankSpace() for x in range(8)] for _ in range(rows)]
+        self.board = [[Placeholder() for x in range(8)] for _ in range(rows)]
 
         self.board[0][1] = Stone(0,1,'black','normal')
         self.board[0][3] = Stone(0,3,'black','normal')
@@ -41,13 +41,11 @@ class Board:
         self.board[5][4] = Stone(5,4,'white','normal')
         self.board[5][6] = Stone(5,6,'white','normal')
 
-
+        
         self.player1 = 'p1'
         self.player2 = 'p2'
 
         self.turn = 'white'
-
-        # self.winner = None
 
         horizontal = ['a','b','c','d','e','f','g','h'] 
         wertical = [1,2,3,4,5,6,7,8]
@@ -67,9 +65,9 @@ class Board:
                     else:
                         black_count+=1
         if white_count == 0:
-            return True, 'white'
-        if black_count == 0:
             return True, 'black'
+        if black_count == 0:
+            return True, 'white'
         
         return False, 'noone'
 
@@ -106,7 +104,7 @@ class Board:
         )
 
 
-class BlankSpace:
+class Placeholder:
     def __init__(self):
         self.name = 'BlankSpace'
 
@@ -145,9 +143,9 @@ class Stone:
             if validation:
                 if event:
                     if event=='delete':
-                        game.board[event_place[1]][event_place[0]] = BlankSpace()
+                        game.board[event_place[1]][event_place[0]] = Placeholder()
                         attacked = True
-                game.board[self.row][self.col] = BlankSpace()
+                game.board[self.row][self.col] = Placeholder()
                 game.board[new_pos[1]][new_pos[0]] = self
                 self.update_pos(new_pos)
                 self.pos = (new_pos[0],new_pos[1])
@@ -183,34 +181,34 @@ class Stone:
     def stone_enviroment(self, old_pos, game, color):
         enviroment = {}
         try:
-            if isinstance(game.board[old_pos[1]-1][old_pos[0]+1],BlankSpace): # up/right
+            if isinstance(game.board[old_pos[1]-1][old_pos[0]+1],Placeholder): # up/right
                 enviroment[(old_pos[0]+1,old_pos[1]-1)] = ((old_pos[0]+1,old_pos[1]-1), None)
             else:
-                if game.board[old_pos[1]-1][old_pos[0]+1].color!=color and isinstance(game.board[old_pos[1]-2][old_pos[0]+2], BlankSpace):
+                if game.board[old_pos[1]-1][old_pos[0]+1].color!=color and isinstance(game.board[old_pos[1]-2][old_pos[0]+2], Placeholder):
                     enviroment[(old_pos[0]+1,old_pos[1]-1)] = ((old_pos[0]+2,old_pos[1]-2), 'delete')
         except IndexError:
             pass
         try:
-            if isinstance(game.board[old_pos[1]-1][old_pos[0]-1],BlankSpace): # up/left
+            if isinstance(game.board[old_pos[1]-1][old_pos[0]-1],Placeholder): # up/left
                 enviroment[(old_pos[0]-1,old_pos[1]-1)] = ((old_pos[0]-1,old_pos[1]-1), None)
             else:
-                if game.board[old_pos[1]-1][old_pos[0]-1].color!=color and isinstance(game.board[old_pos[1]-2][old_pos[0]-2], BlankSpace):
+                if game.board[old_pos[1]-1][old_pos[0]-1].color!=color and isinstance(game.board[old_pos[1]-2][old_pos[0]-2], Placeholder):
                     enviroment[(old_pos[0]-1,old_pos[1]-1)] = ((old_pos[0]-2,old_pos[1]-2), 'delete')
         except IndexError:
             pass
         try:
-            if isinstance(game.board[old_pos[1]+1][old_pos[0]+1],BlankSpace): # down/right
+            if isinstance(game.board[old_pos[1]+1][old_pos[0]+1],Placeholder): # down/right
                 enviroment[(old_pos[0]+1,old_pos[1]+1)] = ((old_pos[0]+1,old_pos[1]+1), None)
             else:
-                if game.board[old_pos[1]+1][old_pos[0]+1].color!=color and isinstance(game.board[old_pos[1]+2][old_pos[0]+2], BlankSpace):
+                if game.board[old_pos[1]+1][old_pos[0]+1].color!=color and isinstance(game.board[old_pos[1]+2][old_pos[0]+2], Placeholder):
                     enviroment[(old_pos[0]+1,old_pos[1]+1)] = ((old_pos[0]+2,old_pos[1]+2), 'delete')
         except IndexError:
             pass
         try:
-            if isinstance(game.board[old_pos[1]+1][old_pos[0]-1],BlankSpace): # down/left
+            if isinstance(game.board[old_pos[1]+1][old_pos[0]-1],Placeholder): # down/left
                 enviroment[(old_pos[0]-1,old_pos[1]+1)] = ((old_pos[0]-1,old_pos[1]+1), None)
             else:
-                if game.board[old_pos[1]+1][old_pos[0]-1].color!=color and isinstance(game.board[old_pos[1]+2][old_pos[0]-2], BlankSpace):
+                if game.board[old_pos[1]+1][old_pos[0]-1].color!=color and isinstance(game.board[old_pos[1]+2][old_pos[0]-2], Placeholder):
                     enviroment[(old_pos[0]-1,old_pos[1]+1)] = ((old_pos[0]-2,old_pos[1]+2), 'delete')
         except IndexError:
             pass
@@ -232,10 +230,10 @@ class Stone:
             if old_pos[1]-x<0:
                 break
             try:
-                if isinstance(game.board[old_pos[1]-x][old_pos[0]+x],BlankSpace): # up/right
+                if isinstance(game.board[old_pos[1]-x][old_pos[0]+x],Placeholder): # up/right
                     enviroment[(old_pos[0]+x,old_pos[1]-x)] = ((old_pos[0]+x,old_pos[1]-x), attack)
                 else:
-                    if game.board[old_pos[1]-x][old_pos[0]+x].color!=color and isinstance(game.board[old_pos[1]-(x+1)][old_pos[0]+(x+1)], BlankSpace):
+                    if game.board[old_pos[1]-x][old_pos[0]+x].color!=color and isinstance(game.board[old_pos[1]-(x+1)][old_pos[0]+(x+1)], Placeholder):
                         enviroment[(old_pos[0]+x,old_pos[1]-x)] = ((old_pos[0]+(x+1),old_pos[1]-(x+1)), 'delete')
                         attack = 'delete'
                         attacked_at = (old_pos[0]+x,old_pos[1]-x)
@@ -250,10 +248,10 @@ class Stone:
             if old_pos[1]-x<0:
                 break
             try:
-                if isinstance(game.board[old_pos[1]-x][old_pos[0]-x],BlankSpace): # up/left
+                if isinstance(game.board[old_pos[1]-x][old_pos[0]-x],Placeholder): # up/left
                     enviroment[(old_pos[0]-x,old_pos[1]-x)] = ((old_pos[0]-x,old_pos[1]-x), attack)
                 else:
-                    if game.board[old_pos[1]-x][old_pos[0]-x].color!=color and isinstance(game.board[old_pos[1]-(x+1)][old_pos[0]-(x+1)], BlankSpace):
+                    if game.board[old_pos[1]-x][old_pos[0]-x].color!=color and isinstance(game.board[old_pos[1]-(x+1)][old_pos[0]-(x+1)], Placeholder):
                         enviroment[(old_pos[0]-x,old_pos[1]-x)] = ((old_pos[0]-(x+1),old_pos[1]-(x+1)), 'delete')
                         attacked_at = (old_pos[0]-x,old_pos[1]-x)
                         attack = 'delete'
@@ -268,10 +266,10 @@ class Stone:
             if old_pos[1]+x>7:
                 break
             try:
-                if isinstance(game.board[old_pos[1]+x][old_pos[0]+x],BlankSpace): # down/right
+                if isinstance(game.board[old_pos[1]+x][old_pos[0]+x],Placeholder): # down/right
                     enviroment[(old_pos[0]+x,old_pos[1]+x)] = ((old_pos[0]+x,old_pos[1]+x), attack)
                 else:
-                    if game.board[old_pos[1]+x][old_pos[0]+x].color!=color and isinstance(game.board[old_pos[1]+(x+1)][old_pos[0]+(x+1)], BlankSpace):
+                    if game.board[old_pos[1]+x][old_pos[0]+x].color!=color and isinstance(game.board[old_pos[1]+(x+1)][old_pos[0]+(x+1)], Placeholder):
                         enviroment[(old_pos[0]+x,old_pos[1]+x)] = ((old_pos[0]+(x+1),old_pos[1]+(x+1)), 'delete')
                         attacked_at = (old_pos[0]+x,old_pos[1]+x)
                         attack = 'delete'
@@ -286,10 +284,10 @@ class Stone:
             if old_pos[1]-x<0:
                 break
             try:
-                if isinstance(game.board[old_pos[1]+x][old_pos[0]-x],BlankSpace): # down/left
+                if isinstance(game.board[old_pos[1]+x][old_pos[0]-x],Placeholder): # down/left
                     enviroment[(old_pos[0]-x,old_pos[1]+x)] = ((old_pos[0]-x,old_pos[1]+x), attack)
                 else:
-                    if game.board[old_pos[1]+x][old_pos[0]-x].color!=color and isinstance(game.board[old_pos[1]+(x+1)][old_pos[0]-(x+1)], BlankSpace):
+                    if game.board[old_pos[1]+x][old_pos[0]-x].color!=color and isinstance(game.board[old_pos[1]+(x+1)][old_pos[0]-(x+1)], Placeholder):
                         enviroment[(old_pos[0]-x,old_pos[1]+x)] = ((old_pos[0]-(x+1),old_pos[1]+(x+1)), 'delete')
                         attacked_at = (old_pos[0]-x,old_pos[1]+x)
                         attack = 'delete'
@@ -436,3 +434,4 @@ class Game:
             return self, True, winner
         
         return self, True, attacked
+
