@@ -86,15 +86,23 @@ class Board:
 
     def draw_board(self):
         print(
-            '  ', ' A', ' B', ' C', ' D', ' E' , ' F', 'G ', ' H', '\n',
-            '8', self.board[0][0], self.board[0][1], self.board[0][2], self.board[0][3], self.board[0][4], self.board[0][5], self.board[0][6], self.board[0][7], '\n',
-            '7', self.board[1][0], self.board[1][1], self.board[1][2], self.board[1][3], self.board[1][4], self.board[1][5], self.board[1][6], self.board[1][7], '\n',
-            '6', self.board[2][0], self.board[2][1], self.board[2][2], self.board[2][3], self.board[2][4], self.board[2][5], self.board[2][6], self.board[2][7], '\n',
-            '5', self.board[3][0], self.board[3][1], self.board[3][2], self.board[3][3], self.board[3][4], self.board[3][5], self.board[3][6], self.board[3][7], '\n',
-            '4', self.board[4][0], self.board[4][1], self.board[4][2], self.board[4][3], self.board[4][4], self.board[4][5], self.board[4][6], self.board[4][7], '\n',
-            '3', self.board[5][0], self.board[5][1], self.board[5][2], self.board[5][3], self.board[5][4], self.board[5][5], self.board[5][6], self.board[5][7], '\n',
-            '2', self.board[6][0], self.board[6][1], self.board[6][2], self.board[6][3], self.board[6][4], self.board[6][5], self.board[6][6], self.board[6][7], '\n',
-            '1', self.board[7][0], self.board[7][1], self.board[7][2], self.board[7][3], self.board[7][4], self.board[7][5], self.board[7][6], self.board[7][7], '\n',
+            '  ',' |', ' A',' |', ' B',' |', ' C',' |', ' D',' |', ' E' ,' |', ' F',' |', ' G',' |', ' H', '\n',
+            '-',' +',' -',' +',' -',' +',' -',' +',' -',' +',' -',' +',' -',' +',' -',' +', ' -', '\n',
+            '8', ' |', self.board[0][0],' |', self.board[0][1],' |', self.board[0][2], ' |', self.board[0][3],' |', self.board[0][4],' |', self.board[0][5],' |', self.board[0][6],' |', self.board[0][7], '\n',
+            '-',' +',' -',' +',' -',' +',' -',' +',' -',' +',' -',' +',' -',' +',' -',' +', ' -', '\n',
+            '7', ' |', self.board[1][0],' |',  self.board[1][1],' |', self.board[1][2],' |', self.board[1][3],' |', self.board[1][4],' |', self.board[1][5],' |', self.board[1][6],' |', self.board[1][7], '\n',
+            '-',' +',' -',' +',' -',' +',' -',' +',' -',' +',' -',' +',' -',' +',' -',' +', ' -', '\n',
+            '6', ' |', self.board[2][0],' |',  self.board[2][1],' |', self.board[2][2],' |', self.board[2][3],' |', self.board[2][4],' |', self.board[2][5],' |', self.board[2][6],' |', self.board[2][7], '\n',
+            '-',' +',' -',' +',' -',' +',' -',' +',' -',' +',' -',' +',' -',' +',' -',' +', ' -', '\n',
+            '5', ' |', self.board[3][0],' |',  self.board[3][1],' |', self.board[3][2],' |', self.board[3][3],' |', self.board[3][4],' |', self.board[3][5],' |', self.board[3][6],' |', self.board[3][7], '\n',
+            '-',' +',' -',' +',' -',' +',' -',' +',' -',' +',' -',' +',' -',' +',' -',' +', ' -', '\n',
+            '4', ' |', self.board[4][0],' |',  self.board[4][1],' |', self.board[4][2],' |', self.board[4][3],' |', self.board[4][4],' |', self.board[4][5],' |', self.board[4][6],' |', self.board[4][7], '\n',
+            '-',' +',' -',' +',' -',' +',' -',' +',' -',' +',' -',' +',' -',' +',' -',' +', ' -', '\n',
+            '3', ' |', self.board[5][0],' |',  self.board[5][1],' |', self.board[5][2],' |', self.board[5][3],' |', self.board[5][4],' |', self.board[5][5],' |', self.board[5][6],' |', self.board[5][7], '\n',
+            '-',' +',' -',' +',' -',' +',' -',' +',' -',' +',' -',' +',' -',' +',' -',' +', ' -', '\n',
+            '2', ' |', self.board[6][0],' |',  self.board[6][1],' |', self.board[6][2],' |', self.board[6][3],' |', self.board[6][4],' |', self.board[6][5],' |', self.board[6][6],' |', self.board[6][7], '\n',
+            '-',' +',' -',' +',' -',' +',' -',' +',' -',' +',' -',' +',' -',' +',' -',' +', ' -', '\n',
+            '1', ' |', self.board[7][0],' |',  self.board[7][1],' |', self.board[7][2],' |', self.board[7][3],' |', self.board[7][4],' |', self.board[7][5],' |', self.board[7][6],' |', self.board[7][7], '\n',
         )
 
 
@@ -206,6 +214,11 @@ class Stone:
                     enviroment[(old_pos[0]-1,old_pos[1]+1)] = ((old_pos[0]-2,old_pos[1]+2), 'delete')
         except IndexError:
             pass
+
+        for old,new in enviroment.items():
+            if 0>new[0][0]>7 or 0>new[0][1]>7:
+                enviroment.pop(old, None)
+
         return enviroment
 
 
@@ -214,9 +227,9 @@ class Stone:
         attack = None
         attacked_at = None
         for x in range(1,8):
-            if old_pos[0]+x>8:
+            if old_pos[0]+x>7:
                 break
-            if old_pos[1]-x<1:
+            if old_pos[1]-x<0:
                 break
             try:
                 if isinstance(game.board[old_pos[1]-x][old_pos[0]+x],BlankSpace): # up/right
@@ -250,9 +263,9 @@ class Stone:
                 pass
         attack = None
         for x in range(1,8):
-            if old_pos[0]+x>8:
+            if old_pos[0]+x>7:
                 break
-            if old_pos[1]+x>8:
+            if old_pos[1]+x>7:
                 break
             try:
                 if isinstance(game.board[old_pos[1]+x][old_pos[0]+x],BlankSpace): # down/right
@@ -268,9 +281,9 @@ class Stone:
                 pass
         attack = None
         for x in range(1,8):
-            if old_pos[0]+x>8:
+            if old_pos[0]+x>7:
                 break
-            if old_pos[1]-x<1:
+            if old_pos[1]-x<0:
                 break
             try:
                 if isinstance(game.board[old_pos[1]+x][old_pos[0]-x],BlankSpace): # down/left
@@ -366,17 +379,6 @@ class Game:
         
         except:
             return False
-
-    # def run_game(self):
-    #     b = Board(8,8)
-        # event = None
-        # while True:
-        #     os.system('cls')
-        #     b.draw_board()
-        #     if event:
-        #         print(event)
-        #     print('Turn: ', b.turn)
-        #     move = input("What's ur move? ")
         
     def make_move(self, move):
         event = None
@@ -434,10 +436,3 @@ class Game:
             return self, True, winner
         
         return self, True, attacked
-
-
-
-# game1 = Game()
-
-# game1.run_game()
-

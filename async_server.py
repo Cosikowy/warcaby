@@ -145,8 +145,7 @@ class Server:
                 else:
                     await self.response_to_player(player_one, response)
 
-                # writer.write(response)
-                # await writer.drain()
+
                 response = json.loads(response.decode())
 
 
