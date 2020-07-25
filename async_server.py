@@ -116,31 +116,31 @@ class Server:
             'color':'white'
         }
         
+        incorrect_name = True
         while True:
-            name_exist = True
             data = await reader.read(2048)
             message = data.decode()
             msg_json = json.loads(message)
             
-            
             print('ping')
-            
-            if msg_json['player_status']!='existing':
-                if msg_json['player_status'] == 'new' and msg_json['name'] not in self.players.keys():
-                    self.players[msg_json['name']] = writer
-                elif msg_json['player_status'] == 'new' and msg_json['name'] in self.players.keys():
-                    print('naming went wrong')
-                    return_msg = 'Name already used!'.encode()
-                    writer.write(return_msg)
-                    await writer.drain()
-                    data = await reader.read(2048)
-                    message = data.decode()
-                    msg_json = json.loads(message)
-                elif msg_json['player_status'] == 'exist':
-                    pass
+            while incorrect_name:
+                if msg_json['player_status']!='existing':
+                    if msg_json['player_status'] == 'new' and msg_json['name'] not in self.players.keys():
+                        self.players[msg_json['name']] = writer
+                        incorrect_name = False
+                    elif msg_json['player_status'] == 'new' and msg_json['name'] in self.players.keys():
+                        print('naming went wrong')
+                        return_msg = 'Name already used!'.encode()
+                        writer.write(return_msg)
+                        await writer.drain()
+                        data = await reader.read(2048)
+                        message = data.decode()
+                        msg_json = json.loads(message)
+                    elif msg_json['player_status'] == 'exist':
+                        incorrect_name = False
             if msg_json['name'] not in self.players.keys():
                 self.players[msg_json['name']] = writer
-            
+                
             
             if msg_json['game_id']=='':
                 print('game_creation')
