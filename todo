@@ -1,4 +1,5 @@
 chain attack detection
 
-server - basic -> multigame
-client
+add game object on server and sync with clients, pickling for game obj 
+
+multigame on server
