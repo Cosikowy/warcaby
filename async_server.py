@@ -3,68 +3,14 @@ import json
 import ast
 import pickle
 import random
-
-
-
-# async def handle_connection(reader, writer):
-#     global players
-    
-#     while True:
-
-#         data = await reader.read(2048)
-#         # data2 = data
-#         message = data.decode()
-
-#         msg_json = json.loads(message)
-#         players[msg_json['name']] = writer
-#         addr = writer.get_extra_info('peername')
-
-#         print(f"Received {msg_json['msg']} from {msg_json['name']}   - {addr}")
-#         print(f"Send: {message}")
-
-        
-
-#         for player in players.keys():
-#             if player!=msg_json['name']:
-#                 writer2 = players[player]
-#                 writer2.write(data)                 # Ta część jest jak będzie już 2 graczy w lobby
-#                 await writer2.drain()
-#             if msg_json['msg']=='close':
-#                 writer2 = players[player]
-#                 writer2.write(data)
-#                 await writer2.drain()
-
-#         writer.write(data)
-#         await writer.drain()
-
-
-#         if message == '':
-#             print("Connection lost")
-#             writer.close()
-
-#         if msg_json['msg'] == 'close':
-#             print("Close the connection")
-#             writer.close()
-
-
-# players = {}
-# async def main():
-#     server = await asyncio.start_server(
-#         handle_connection, '127.0.0.1', 5000)
-
-#     addr = server.sockets[0].getsockname()
-#     print(f'Serving on {addr}')
-
-#     async with server:
-#         await server.serve_forever()
-
-# asyncio.run(main())
+import datetime
 
 
 class Server:
     players = {}
     queue = []
     lobby = {}
+    games = {}
     def __init__(self):
         asyncio.run(self.main())
     
@@ -113,7 +59,8 @@ class Server:
             'move':'',
             'game_id':'',
             'game_status':'',
-            'color':'white'
+            'color':'white',
+            'turn':'w',
         }
         
         incorrect_name = True
@@ -160,6 +107,12 @@ class Server:
                     
                     player_one = self.lobby[game_id][0]
                     player_two = self.lobby[game_id][1]
+                    self.games[game_id] = {
+                        'players':(player_one, player_two),
+                        'game_id': game_id,
+                        'started': datetime.datetime.now().strftime('%Y-%m-%d_%H:%M'),
+                        'status': 'ongoing/unfinished'
+                    }
                     await self.response_to_player(player_one, response)
                     response_p2 = response
                     response_p2['color'] = 'black'
@@ -186,7 +139,7 @@ class Server:
                 print(f"Send: {response}")
                 
                 response = json.dumps(response).encode()
-                
+                # self.games[msg_json['game_id']]['last move'] = datetime.datetime.now('%Y_%m_%d')
                 if msg_json['color']=='white':
                     await self.response_to_player(player_two, response)
                 else:

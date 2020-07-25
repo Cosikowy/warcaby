@@ -2,6 +2,8 @@ import asyncio
 import socket
 import json
 import pickle
+from game import Game
+import os
 
 async def wait_for_data():
     loop = asyncio.get_running_loop()
@@ -26,11 +28,12 @@ async def wait_for_data():
         loop.call_soon(client.send, name_msg.encode())
         response = await reader.read(2048)
         response = response.decode()
-        print(response)
+        # print(response)
         if response != 'Name already used!':
             incorrect_name = False
             send_dict['player_status'] = 'existing'
         else:
+            print('Name already in use!')
             send_dict['name'] = input('name: ')
 
     no_enemy = True
@@ -56,52 +59,89 @@ async def wait_for_data():
     send_dict['color'] = response['color']
     send_dict['player_status'] = 'existing'
 
+    game = Game(ID = send_dict['game_id'])
     while connected:
-        
-        # print(send_dict)
-        print('board')
-        
+        game.game_board.draw_board()
+        moves = []
+        attacked = True
         if send_dict['color']=='white':
-            print('Your move')
-            send_dict['move'] = input('msg: ')
-            print('board_updated')
+            while attacked:
+                print('Turn: white')
+                print('Your move:')
+                move =input()
+                game, correct_move, event = game.make_move(move)
+                os.system('cls')
+                if correct_move:
+                    moves.append(move)
+                if isinstance(event,bool):
+                    attacked = event
+                if correct_move:
+                    attacked = False
+                else:
+                    print('Wrong move!')
+                game.game_board.draw_board()
 
+            
+            # print(game.board.draw_board())
+
+
+            send_dict['move'] = moves
             message = json.dumps(send_dict)
             loop.call_soon(client.send, message.encode())
-
+            print('Turn: black')
             print("Waiting for oponent's move")
             data = await reader.read(2048)
             data = json.loads(data.decode())
-            print('Enemy move:',data['move'])
+            print('Enemy move(s):',data['move'])
+            if isinstance(data['move'], list):
+                for move in data['move']:
+                    game, _, _ = game.make_move(move)
+
         else:
+            print('Turn: white')
             print("Waiting for oponent's move")
             data = await reader.read(2048)
             data = json.loads(data.decode())
-            print('Enemy move:',data['move'])
-            print('board_updated')
-            print('Your move')
-            send_dict['move'] = input('msg: ')
-            print('board_updated')
+            print('Enemy move(s):',data['move'])
+            if isinstance(data['move'], list):
+                for move in data['move']:
+                    game, _, _ = game.make_move(move)
+            
+            game.game_board.draw_board()
+            
+            while attacked:
+                print('Turn: black')
+                print('Your move:')
+                move =input()
+                game, correct_move, event = game.make_move(move)
+                os.system('cls')
+                if correct_move:
+                    moves.append(move)
+                if correct_move:
+                    attacked = False
+                if isinstance(event,bool):
+                    attacked = event
+                else:
+                    print('Wrong move!')
+                game.game_board.draw_board()
+
+            # print('Turn: black')
+            # print('Your move')
+
+
+            send_dict['move'] = moves
+            # print(game.board.draw_board())
+
             message = json.dumps(send_dict)
             loop.call_soon(client.send, message.encode())
 
-        
-        
-        
-        
-        
-        
-        if send_dict['msg'] == 'close':
-            writer.close()
-            client.close()
-            connected = False
-
-
 
         if send_dict['msg'] == 'close':
             writer.close()
             client.close()
             connected = False
+
+
 
 
 

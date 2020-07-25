@@ -343,8 +343,9 @@ class Stone:
 
 class Game:
     
-    def __init__(self):
-        self.ID = ''
+    def __init__(self, ID=None):
+        self.ID = ID
+        self.game_board = Board(8,8)
     
     def validate_input(self, _input):
         try:
@@ -366,67 +367,77 @@ class Game:
         except:
             return False
 
-    def run_game(self):
-        b = Board(8,8)
+    # def run_game(self):
+    #     b = Board(8,8)
+        # event = None
+        # while True:
+        #     os.system('cls')
+        #     b.draw_board()
+        #     if event:
+        #         print(event)
+        #     print('Turn: ', b.turn)
+        #     move = input("What's ur move? ")
+        
+    def make_move(self, move):
         event = None
-        while True:
-            os.system('cls')
-            b.draw_board()
-            if event:
-                print(event)
-            print('Turn: ', b.turn)
-            move = input("What's ur move? ")
-            if self.validate_input(move):
+        if self.validate_input(move):
+            old_pos = move.split(',')[0]
+            new_pos = move.split(',')[1]
 
-                old_pos = move.split(',')[0]
-                new_pos = move.split(',')[1]
-                picked_stone = move.split(',')[0]
-                destination = move.split(',')[1]
-                old_pos, new_pos = b.decode_move(old_pos, new_pos)
-                selected = b.board[old_pos[1]][old_pos[0]]
-                if isinstance(selected, Stone):
-                    b, attacked, new_pos, move_event = b.board[old_pos[1]][old_pos[0]].make_move(new_pos, b)
-                    if attacked:
-                        if move_event == 'deleted':
-                            event = f'Attacked at {destination}'
-                        possible_attack = False
-                        if selected.mode =='normal':
-                            enviroment = selected.stone_enviroment(selected.pos, b, b.turn)
-                        else:
-                            enviroment, _ = selected.queen_enviroment(selected.pos, b, b.turn)
-                        for key, value in enviroment.items():
-                            if value[1] == 'delete':
-                                possible_attack = True
-                                break
-                        if possible_attack:
-                            possible_attack = False
-                            if b.turn == 'white':
-                                b.turn = 'black'
-                            else:
-                                b.turn = 'white'
+            stone = move.split(',')[0]
+            destination = move.split(',')[1]
+
+            old_pos, new_pos = self.game_board.decode_move(old_pos, new_pos)
+            selected = self.game_board.board[old_pos[1]][old_pos[0]]
+
+            if isinstance(selected, Stone):
+                self.board, attacked, new_pos, move_event = self.game_board.board[old_pos[1]][old_pos[0]].make_move(new_pos, self.game_board)
+                if attacked:
+                    if move_event == 'deleted':
+                        event = f'Attacked at {destination}'
+                    possible_attack = False
+                    if selected.mode =='normal':
+                        enviroment = selected.stone_enviroment(selected.pos, self.game_board, self.game_board.turn)
                     else:
-                        event = f'Moved to {destination}'
-                    if selected.check_for_upgrade(new_pos):
-                        selected.mode = 'queen'
-                        if selected.color == 'white':
-                            selected.name = 'WQ'
+                        enviroment, _ = selected.queen_enviroment(selected.pos, self.game_board, self.game_board.turn)
+                    for key, value in enviroment.items():
+                        if value[1] == 'delete':
+                            possible_attack = True
+                            break
+                    if possible_attack:
+                        possible_attack = False
+                        if self.b.turn == 'white':
+                            self.b.turn = 'black'
                         else:
-                            selected.name = 'BQ'
+                            self.b.turn = 'white'
                 else:
-                    event = 'You picked blank space'
+                    event = f'Moved to {destination}'
+                
+                if selected.check_for_upgrade(new_pos):
+                    selected.mode = 'queen'
+                    if selected.color == 'white':
+                        selected.name = 'WQ'
+                    else:
+                        selected.name = 'BQ'
+
             else:
-                event = 'Wrong move'
+                event = 'You picked blank space'
+                return self, False, event
+        else:
+            event = 'Wrong move'
+            return self, False, event
 
 
-                winner_check, winner = b.winner()
+        winner_check, winner = self.game_board.winner()
 
-                if winner_check:
-                    return winner
+        if winner_check:
+            return self, True, winner
+        
+        return self, True, attacked
 
 
 
+# game1 = Game()
 
-game1 = Game()
-
-game1.run_game()
+# game1.run_game()
 
