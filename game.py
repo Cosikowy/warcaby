@@ -10,7 +10,7 @@ class Board:
         self.ready = False
         self.last = None
 
-        self.board = [[Placeholder() for x in range(8)] for _ in range(rows)]
+        self.board = [[Placeholder() for x in range(cols)] for _ in range(rows)]
 
         self.board[0][1] = Stone(0,1,'black','normal')
         self.board[0][3] = Stone(0,3,'black','normal')
@@ -268,9 +268,9 @@ class Stone:
                 pass
         attack = None
         for x in range(1,8):
-            if old_pos[0]+x>7:
+            if old_pos[0]-x<0:
                 break
-            if old_pos[1]-x<0:
+            if old_pos[1]+x>7:
                 break
             try:
                 if isinstance(game.board[old_pos[1]+x][old_pos[0]-x],Placeholder): # down/left
@@ -323,7 +323,7 @@ class Stone:
             else:
                 return False, None, None, None
         else:
-            possible_moves, attacked_at = selected.queen_enviroment(old_pos, game, game.turn)
+            possible_moves, attacked_at = self.queen_enviroment(old_pos, game, game.turn)
             priority_moves = {}
             for key, value in possible_moves.items():
                 if possible_moves[key][1] == 'delete':
@@ -403,10 +403,10 @@ class Game:
                             break
                     if possible_attack:
                         possible_attack = False
-                        if self.b.turn == 'white':
-                            self.b.turn = 'black'
+                        if self.game_board.turn == 'white':
+                            self.game_board.turn = 'black'
                         else:
-                            self.b.turn = 'white'
+                            self.game_board.turn = 'white'
                 else:
                     event = f'Moved to {destination}'
                 
