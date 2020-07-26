@@ -47,12 +47,6 @@ class Server:
             msg_json = message
         return msg_json
 
-    def check_names(self, name):
-        if name in players.keys():
-            return True 
-        else:
-            return False
-
     async def handle_connection(self, reader, writer):
         self.running_games = set()
         response = {
@@ -70,13 +64,15 @@ class Server:
             msg_json = json.loads(message)
             while incorrect_name:
                 if msg_json['player_status']!='existing':
-                    if msg_json['player_status'] == 'new' and msg_json['name'] not in self.players.keys():
+                    if (msg_json['player_status'] == 'new' and 
+                       msg_json['name'] not in self.players.keys()):
                         self.players[msg_json['name']] = writer
                         incorrect_name = False
                         return_msg = 'ok'.encode()
                         writer.write(return_msg)
                         await writer.drain()
-                    elif msg_json['player_status'] == 'new' and msg_json['name'] in self.players.keys():
+                    elif (msg_json['player_status'] == 'new' and 
+                         msg_json['name'] in self.players.keys()):
                         print('naming went wrong')
                         return_msg = 'Name already used!'.encode()
                         writer.write(return_msg)
@@ -86,12 +82,11 @@ class Server:
                         msg_json = json.loads(message)
                     elif msg_json['player_status'] == 'exist':
                         incorrect_name = False
+            
             if msg_json['name'] not in self.players.keys():
                 self.players[msg_json['name']] = writer
-            print(msg_json)
+
             if msg_json['command'] == 'new game':
-                
-                # message = data.decode()
                 self.response_to_player(msg_json['name'], {'msg': 'ok'})
                 if msg_json['game_id']=='':
                     print('game_creation')
@@ -122,13 +117,12 @@ class Server:
                         response_p2 = response
                         response_p2['color'] = 'black'
                         await self.response_to_player(player_two, response_p2)
-                        
+
                     else:
                         return_msg = 'wait'.encode()
                         writer.write(return_msg)
                         await writer.drain()
                     print('game created')
-
 
                 elif msg_json['game_id']!='':
                     finished = False
@@ -146,7 +140,6 @@ class Server:
                     response = json.dumps(response).encode()
                     self.games[msg_json['game_id']]['last move'] = datetime.datetime.now().strftime('%Y-%m-%d_%H:%M')
                     
-                        
                     if finished:
                         self.games[msg_json['game_id']]['status'] = 'finished'
                         self.running_games.discard(msg_json['game_id'])
@@ -158,9 +151,7 @@ class Server:
                     else:
                         await self.response_to_player(player_one, response)
 
-
                     response = json.loads(response.decode())
-
 
                 if message == '':
                     print("Connection lost")
@@ -176,6 +167,7 @@ class Server:
             elif msg_json['command'] == 'currently playing':
                 curr_players = str([', '.join(x for x in self.players.keys())])
                 await self.response_to_player(msg_json['name'], curr_players)
+
             elif msg_json['command'] == 'games':
                 games = self.games
                 games = str([', '.join(x for x in self.games)])

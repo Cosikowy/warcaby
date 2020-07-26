@@ -16,8 +16,6 @@ async def run_game():
             'game_status':'',
             'command':'',
             }
-        
-
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.connect(('localhost',5000))
 
@@ -38,12 +36,13 @@ async def run_game():
         else:
             print('Name already in use!')
             send_dict['name'] = input('name: ')
-    while True:
+    
+    while True:                                         # Used to maintain connection between client and server 
         send_dict['command'] = ''
         print('NEW GAME | CURRENTLY PLAYING | HISTORY | GAMES')
         command = input('').lower()
         msg = json.dumps(send_dict)
-        if command == 'new game':
+        if command == 'new game':                       # Starting new game
             send_dict['command'] = 'new game'
             msg = json.dumps(send_dict)
             writer.write(msg.encode())
@@ -70,6 +69,7 @@ async def run_game():
                 response = json.loads(response)
             except:
                 pass
+            
             send_dict['game_id'] = response['game_id']
             send_dict['color'] = response['color']
             send_dict['player_status'] = 'existing'
@@ -80,7 +80,7 @@ async def run_game():
                 moves = []
                 attacked = True
                 
-                if send_dict['color']=='white':
+                if send_dict['color']=='white':                 # Logic for white stones
                     game.game_board.draw_board()
 
                     while attacked:
@@ -89,11 +89,12 @@ async def run_game():
                         move =input()
                         game, correct_move, event = game.make_move(move)
                         
-
                         if correct_move:
                             moves.append(move)
+
                         if isinstance(event,bool):
                             attacked = event
+
                         if correct_move:
                             attacked = False
                         else:
@@ -105,7 +106,6 @@ async def run_game():
                     if event == 'white' or event == 'black':
                         send_dict['game_status'] = f'finished, winner {event}'
                         
-
                     message = json.dumps(send_dict)
                     loop.call_soon(client.send, message.encode())
                     if 'finished' in send_dict['game_status']:
@@ -129,8 +129,7 @@ async def run_game():
                         for move in data['move']:
                             game, _, _ = game.make_move(move)
                     
-                    
-                else:
+                else:                                           # Logic for black stones
                     game.game_board.draw_board()
                     print('Turn: white')
                     print("Waiting for oponent's move")
@@ -170,11 +169,8 @@ async def run_game():
                     
                     if event == 'white' or event == 'black':
                         send_dict['game_status'] = f'finished, winner {event}'
-                        
-
 
                     send_dict['move'] = moves
-
                     message = json.dumps(send_dict)
                     loop.call_soon(client.send, message.encode())
                     if 'finished' in send_dict['game_status']:
@@ -183,7 +179,7 @@ async def run_game():
                         connected = False
                         break
                     
-        elif command == 'currently playing':
+        elif command == 'currently playing':                         # Requesting list of currently playing players 
             send_dict['command'] = 'currently playing'
             message = json.dumps(send_dict)
             loop.call_soon(client.send, message.encode())
@@ -192,7 +188,7 @@ async def run_game():
             pprint.pprint(data)
             input()
         
-        elif command == 'history':
+        elif command == 'history':                                   # Requesting games history
             send_dict['command'] = 'history'
             message = json.dumps(send_dict)
             loop.call_soon(client.send, message.encode())
@@ -201,7 +197,7 @@ async def run_game():
             pprint.pprint(data)
             input()
         
-        elif command == 'games':
+        elif command == 'games':                                     # Requesting current games in progress
             send_dict['command'] = 'games'
             message = json.dumps(send_dict)
             loop.call_soon(client.send, message.encode())
@@ -209,8 +205,6 @@ async def run_game():
             data = data.decode()
             pprint.pprint(data)
             input()
-
-
 
 
 
