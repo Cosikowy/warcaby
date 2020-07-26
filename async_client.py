@@ -6,7 +6,11 @@ import os
 import pprint
 from game import Game
 
+
+
 async def run_game():
+    SERVER_IP = '127.0.0.1'
+    SERVER_PORT = 5000
     loop = asyncio.get_running_loop()
     send_dict = {
             'name':'',
@@ -17,7 +21,7 @@ async def run_game():
             'command':'',
             }
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client.connect(('127.0.0.1',5000))
+    client.connect((SERVER_IP,SERVER_PORT))
 
     reader, writer = await asyncio.open_connection(sock=client)
     print('client: ', client)
