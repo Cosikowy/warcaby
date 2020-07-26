@@ -16,7 +16,7 @@ class Server:
     
     async def main(self):
         self.server = await asyncio.start_server(
-            self.handle_connection, '127.0.0.1', 5000,
+            self.handle_connection, '0.0.0.0', 5000,
             reuse_address=True)
 
         addr = self.server.sockets[0].getsockname()
