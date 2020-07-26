@@ -2,9 +2,9 @@ import asyncio
 import socket
 import json
 import pickle
-from game import Game
 import os
 import pprint
+from game import Game
 
 async def run_game():
     loop = asyncio.get_running_loop()
@@ -17,10 +17,10 @@ async def run_game():
             'command':'',
             }
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client.connect(('localhost',5000))
+    client.connect(('127.0.0.1',5000))
 
     reader, writer = await asyncio.open_connection(sock=client)
-    
+    print('client: ', client)
     connected = True
     send_dict['name'] = input('name: ')
     
@@ -49,7 +49,7 @@ async def run_game():
             await writer.drain()
             response = await reader.read(2048)
             response = response.decode()
-            print(response)
+            # print(response)
             no_enemy = True
             
             try:
@@ -69,7 +69,6 @@ async def run_game():
                 response = json.loads(response)
             except:
                 pass
-            
             send_dict['game_id'] = response['game_id']
             send_dict['color'] = response['color']
             send_dict['player_status'] = 'existing'
