@@ -46,17 +46,18 @@ class Board:
                 self.board[old_pos[0]][old_pos[1]], Placeholder()
                 return True
             else:
-                raise TypeError("It's ain't no free place")
+                raise Exception("It's ain't no free place")
         else:
-            raise TypeError("It's ain't no stone!")
+            raise Exception("It's ain't no stone!")
     
     def check_for_promote(self, pos):
-        white_promote = ()
-        black_promote = ()
-        pass
+        white_promote = ((x,7) for x in range(8))
+        black_promote = ((x,0) for x in range(8))
+        return True if pos in white_promote or pos in black_promote else False
     
     def check_winner(self):
         pass
+        
 
 
 
@@ -79,7 +80,7 @@ class Placeholder:
 
 # class Game:...
 b = Board()
-b.draw_board()
+
 
 # s = Stone('b', 'q')
 # print(s)
