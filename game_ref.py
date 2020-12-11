@@ -101,7 +101,7 @@ class Placeholder:
 # class Game:...
 b = Board()
 b.board[2][4] = Stone('black')
-# b.board[4][4] = Stone('white')
+b.board[4][4] = Stone('white')
 
 moves = b.move_list((3,3))
 for (x,y) in moves.keys():
