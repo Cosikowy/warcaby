@@ -1,5 +1,4 @@
-
-
+from pprint import pprint
 
 class Board:
     def __init__(self, p1 = 'p1', p2 = 'p2'):
@@ -19,12 +18,14 @@ class Board:
             (0,6), (2,6), (4,6), (6,6),
             (1,5), (3,5), (5,5), (7,5)
         )
-        for white, black in zip(self.white_starting_pos, self.black_starting_pos):
-            self.board[white[0]][white[1]] = Stone()
-            self.board[black[0]][black[1]] = Stone('black')
+        # for white, black in zip(self.white_starting_pos, self.black_starting_pos):
+        #     self.board[white[0]][white[1]] = Stone()
+        #     self.board[black[0]][black[1]] = Stone('black')
         
     def draw_board(self):
-        columns_row = ('  ',' |', ' A',' |', ' B',' |', ' C',' |', ' D',' |', ' E' ,' |', ' F',' |', ' G',' |', ' H', '\n')
+        # columns_row = ('  ',' |', ' A',' |', ' B',' |', ' C',' |', ' D',' |', ' E' ,' |', ' F',' |', ' G',' |', ' H', '\n')
+        columns_row = ('  ',' |', ' 0',' |', ' 1',' |', ' 2',' |', ' 3',' |', ' 4' ,' |', ' 5',' |', ' 6',' |', ' 7', '\n')
+        
         spacer = ('-',' +',' -',' +',' -',' +',' -',' +',' -',' +',' -',' +',' -',' +',' -',' +', ' -', '\n')
         board = [*columns_row, *spacer]
         def print_row(number):
@@ -33,22 +34,57 @@ class Board:
                 row.append(' |')
                 row.append(self.board[x][number])
             row.append('\n')
-            return (f'{number+1}', *row)
+            return (f'{number}', *row)
         for row in reversed(range(8)):
             board.extend(print_row(row))
             board.extend(spacer)
         print(*board)
     
-    def make_move(self, old_pos, new_pos):
-        if isinstance(self.board[old_pos[0]][old_pos[1]], Stone):
-            if isinstance(self.board[new_pos[0]][new_pos[1]]):
-                self.board[new_pos[0]][new_pos[1]], self.board[old_pos[0]][old_pos[1]] = \
-                self.board[old_pos[0]][old_pos[1]], Placeholder()
-                return True
-            else:
-                raise Exception("It's ain't no free place")
-        else:
-            raise Exception("It's ain't no stone!")
+    def move_list(self, pos):
+        move_list = []    
+        x = pos[0]
+        y = pos[1]
+        self.board[x][y] = Stone()
+        
+        stone = self.board[x][y]
+        
+        iterations = 1
+        for new_pos in range(x+1, 8, 1):  # right moves
+            # if y+iterations==8:
+            #     break
+            if isinstance(self.board[new_pos][y+iterations], Placeholder):
+                move_list.append((new_pos,y+iterations))
+            elif isinstance(self.board[new_pos][y+iterations+1], Placeholder):
+                move_list.append((new_pos,y+iterations+1))
+
+            if isinstance(self.board[new_pos][y-iterations],Placeholder):
+                move_list.append((new_pos,y-iterations))
+            elif isinstance(self.board[new_pos][y-(iterations+1)], Placeholder):
+                move_list.append((new_pos,y-(iterations+1)))
+            iterations+=1
+        
+        print(x)
+        
+        iterations = 1
+        for new_pos in range(x-1, -1, -1):  # left moves
+            if y+iterations==8:
+                break
+            
+            if isinstance(self.board[new_pos][y+iterations], Placeholder):
+                move_list.append((new_pos,y+iterations))
+            elif isinstance(self.board[new_pos][y+iterations+1], Placeholder):
+                move_list.append((new_pos,y+iterations+1))
+
+            if isinstance(self.board[new_pos][y-iterations],Placeholder):
+                move_list.append((new_pos,y-iterations))
+            elif isinstance(self.board[new_pos][y-(iterations+1)], Placeholder):
+                move_list.append((new_pos,y-(iterations+1)))
+        
+            iterations+=1
+
+        return move_list
+    
+    
     
     def check_for_promote(self, pos):
         white_promote = ((x,7) for x in range(8))
@@ -58,8 +94,6 @@ class Board:
     def check_winner(self):
         pass
         
-
-
 
 
 
@@ -74,13 +108,21 @@ class Stone:
 
  
 class Placeholder:
+    def __init__(self, name = 'x'):
+        self.name = name
+        
     def __repr__(self):
-        return ' x'
+        return f' {self.name}'
 
 
 # class Game:...
 b = Board()
+moves = b.move_list((3,3))
+for (x,y) in moves:
+    b.board[x][y] = Placeholder('C')
 
+b.draw_board()
+print(moves)
 
 # s = Stone('b', 'q')
 # print(s)
