@@ -56,19 +56,18 @@ class Board:
                     elif self.board[new_x][new_y].color ==  stone.color:
                         break
                     elif isinstance(self.board[x_range[i+1]][y_range[i+1]], Placeholder):
-                        action = 'attack'
-                        moves[(x_range[i+1],y_range[i+1])] = action
+                        action = f'attack;{}'
+                        moves[(new_x,new_y)] = action
             except IndexError:
                 pass
         
-        moves_on_line(range(x+1, 8),range(y+1,8), move_list)
-        moves_on_line(range(x+1, 8), range(y-1, -1, -1), move_list)
-        moves_on_line(range(x-1, -1, -1), range(y+1, 8), move_list)
-        moves_on_line(range(x-1, -1, -1), range(y-1, -1, -1), move_list)
+        moves_on_line(range(x+1, 8),range(y+1,8), move_list) # up right
+        moves_on_line(range(x+1, 8), range(y-1, -1, -1), move_list) # down right
+        moves_on_line(range(x-1, -1, -1), range(y+1, 8), move_list) # up left 
+        moves_on_line(range(x-1, -1, -1), range(y-1, -1, -1), move_list) # down left
         
         return move_list
 
-    
     def check_for_promote(self, pos):
         white_promote = ((x,7) for x in range(8))
         black_promote = ((x,0) for x in range(8))
@@ -76,8 +75,6 @@ class Board:
     
     def check_winner(self):
         pass
-        
-
 
 
 class Stone:
@@ -106,6 +103,7 @@ b.board[4][4] = Stone('white')
 moves = b.move_list((3,3))
 for (x,y) in moves.keys():
     b.board[x][y] = Placeholder(f'{moves[(x,y)][0]}')
+b.board[2][4] = Stone('black')
 
 b.draw_board()
 pprint(moves)
