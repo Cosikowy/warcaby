@@ -41,50 +41,33 @@ class Board:
         print(*board)
     
     def move_list(self, pos):
-        move_list = []    
+        move_list = {}    
         x = pos[0]
         y = pos[1]
-        self.board[x][y] = Stone()
-        
+        self.board[x][y] = Stone()    # for testing pourpose
         stone = self.board[x][y]
-        
-        iterations = 1
-        for new_pos in range(x+1, 8, 1):  # right moves
-            # if y+iterations==8:
-            #     break
-            if isinstance(self.board[new_pos][y+iterations], Placeholder):
-                move_list.append((new_pos,y+iterations))
-            elif isinstance(self.board[new_pos][y+iterations+1], Placeholder):
-                move_list.append((new_pos,y+iterations+1))
 
-            if isinstance(self.board[new_pos][y-iterations],Placeholder):
-                move_list.append((new_pos,y-iterations))
-            elif isinstance(self.board[new_pos][y-(iterations+1)], Placeholder):
-                move_list.append((new_pos,y-(iterations+1)))
-            iterations+=1
+        def moves_on_line(x_range, y_range, moves):
+            action = 'move'
+            try:
+                for i, (new_x, new_y) in enumerate(zip(x_range, y_range)):  # right moves
+                    if isinstance(self.board[new_x][new_y], Placeholder):
+                        moves[(new_x, new_y)] = action
+                    elif self.board[new_x][new_y].color ==  stone.color:
+                        break
+                    elif isinstance(self.board[x_range[i+1]][y_range[i+1]], Placeholder):
+                        action = 'attack'
+                        moves[(x_range[i+1],y_range[i+1])] = action
+            except IndexError:
+                pass
         
-        print(x)
+        moves_on_line(range(x+1, 8),range(y+1,8), move_list)
+        moves_on_line(range(x+1, 8), range(y-1, -1, -1), move_list)
+        moves_on_line(range(x-1, -1, -1), range(y+1, 8), move_list)
+        moves_on_line(range(x-1, -1, -1), range(y-1, -1, -1), move_list)
         
-        iterations = 1
-        for new_pos in range(x-1, -1, -1):  # left moves
-            if y+iterations==8:
-                break
-            
-            if isinstance(self.board[new_pos][y+iterations], Placeholder):
-                move_list.append((new_pos,y+iterations))
-            elif isinstance(self.board[new_pos][y+iterations+1], Placeholder):
-                move_list.append((new_pos,y+iterations+1))
-
-            if isinstance(self.board[new_pos][y-iterations],Placeholder):
-                move_list.append((new_pos,y-iterations))
-            elif isinstance(self.board[new_pos][y-(iterations+1)], Placeholder):
-                move_list.append((new_pos,y-(iterations+1)))
-        
-            iterations+=1
-
         return move_list
-    
-    
+
     
     def check_for_promote(self, pos):
         white_promote = ((x,7) for x in range(8))
@@ -117,12 +100,15 @@ class Placeholder:
 
 # class Game:...
 b = Board()
+b.board[2][4] = Stone('black')
+# b.board[4][4] = Stone('white')
+
 moves = b.move_list((3,3))
-for (x,y) in moves:
-    b.board[x][y] = Placeholder('C')
+for (x,y) in moves.keys():
+    b.board[x][y] = Placeholder(f'{moves[(x,y)][0]}')
 
 b.draw_board()
-print(moves)
+pprint(moves)
 
 # s = Stone('b', 'q')
 # print(s)
