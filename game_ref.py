@@ -56,7 +56,7 @@ class Board:
                     elif self.board[new_x][new_y].color ==  stone.color:
                         break
                     elif isinstance(self.board[x_range[i+1]][y_range[i+1]], Placeholder):
-                        action = f'attack;{}'
+                        action = f'attack;{new_x},{new_y}'
                         moves[(new_x,new_y)] = action
             except IndexError:
                 pass
@@ -65,13 +65,46 @@ class Board:
         moves_on_line(range(x+1, 8), range(y-1, -1, -1), move_list) # down right
         moves_on_line(range(x-1, -1, -1), range(y+1, 8), move_list) # up left 
         moves_on_line(range(x-1, -1, -1), range(y-1, -1, -1), move_list) # down left
-        
         return move_list
 
+    def move(self, old_pos, new_pos):
+        x = old_pos[0]
+        y = old_pos[1]
+        new_x = new_pos[0]
+        new_y = new_pos[1]
+        self.board[x][y], self.board[new_x][new_y] = Placeholder(), self.board[x][y]
+        
+
+    def validate_move(self, old_pos, new_pos):
+        move_list = self.move_list(old_pos)
+        x = old_pos[0]
+        y = old_pos[1]
+        new_x = new_pos[0]
+        new_y = new_pos[1]
+        stone = self.board[x][y]
+        
+        
+        if not new_pos in move_list.keys():
+            return False
+        
+        
+        if stone.type == 'stone'.capitalize():
+            
+            return False
+
+        
+        return True
+
     def check_for_promote(self, pos):
+        stone = self.board[pos[0]][pos[1]]
+            
         white_promote = ((x,7) for x in range(8))
         black_promote = ((x,0) for x in range(8))
-        return True if pos in white_promote or pos in black_promote else False
+    
+        if stone.color == 'white'.capitalize():
+            return True if pos in white_promote else False
+        else:
+            return True if pos in black_promote else False
     
     def check_winner(self):
         pass
@@ -105,8 +138,15 @@ for (x,y) in moves.keys():
     b.board[x][y] = Placeholder(f'{moves[(x,y)][0]}')
 b.board[2][4] = Stone('black')
 
+
+
+
 b.draw_board()
 pprint(moves)
+
+
+# b.move((4,4),(6,6))
+# b.draw_board()
 
 # s = Stone('b', 'q')
 # print(s)
