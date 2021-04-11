@@ -430,4 +430,3 @@ class Game:
             return self, True, winner
         
         return self, True, attacked
-
