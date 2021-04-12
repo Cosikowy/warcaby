@@ -44,11 +44,6 @@ class Board:
         print(*board)
 
     def move_list(self, pos):
-        move_list = {}
-        x, y = pos[0], pos[1]
-        self.board[x][y] = Stone()    # for testing pourpose
-        stone = self.board[x][y]
-
         def moves_on_line(x_range, y_range, moves):
             action = 'move'
             try:
@@ -62,6 +57,12 @@ class Board:
                         moves[(new_x, new_y)] = action
             except IndexError:
                 pass
+       
+        move_list = {}
+        x, y = pos[0], pos[1]
+        self.board[x][y] = Stone()    # for testing pourpose
+        stone = self.board[x][y]
+
 
         moves_on_line(range(x+1, 8), range(y+1, 8), move_list)  # up right
         moves_on_line(range(x+1, 8), range(y-1, -1, -1),
@@ -90,11 +91,9 @@ class Board:
 
         if stone.type == 'stone'.capitalize():
             if stone.color == 'white'.capitalize():
-                if y - new_y < -2:
-                    return False
+                return y - new_y < -2
             else:
-                if y - new_y > 2:
-                    return False
+                return y - new_y > 2
 
         return True
 
@@ -110,9 +109,20 @@ class Board:
             return True if pos in black_promote else False
 
     def check_winner(self):
-        pass
-
-
+        stones = {'White':0, 'Black':0 }
+        for x, line in enumerate(self.board):
+            for y, stone in enumerate(line):
+                if isinstance(stone, Stone):
+                    stones[stone.color] += 1
+        
+        if stones['White'] == 0:
+            return True, 'Black'
+        elif stones['Black'] == 0:
+            return True, 'White'
+        else:
+            return False, None
+    
+    
 class Stone:
     def __init__(self, color=None, stone_type=None):
         self.name = "Stone"
@@ -134,16 +144,17 @@ class Placeholder:
 # class Game:...
 b = Board()
 b.board[2][4] = Stone('black')
-b.board[4][4] = Stone('white')
+# b.board[4][4] = Stone('white')
 
 moves = b.move_list((3, 3))
 for (x, y) in moves.keys():
     b.board[x][y] = Placeholder(f'{moves[(x,y)][0]}')
-b.board[2][4] = Stone('black')
+# b.board[2][4] = Stone('black')
 
 
 b.draw_board()
-pprint(moves)
+print(b.check_winner())
+# pprint(moves)
 
 
 # b.move((4,4),(6,6))
