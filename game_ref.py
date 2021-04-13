@@ -1,4 +1,5 @@
-from pprint import pprint
+import string
+from pprint import pprint as pp
 
 
 class Board:
@@ -57,12 +58,11 @@ class Board:
                         moves[(new_x, new_y)] = action
             except IndexError:
                 pass
-       
+
         move_list = {}
         x, y = pos[0], pos[1]
         self.board[x][y] = Stone()    # for testing pourpose
         stone = self.board[x][y]
-
 
         moves_on_line(range(x+1, 8), range(y+1, 8), move_list)  # up right
         moves_on_line(range(x+1, 8), range(y-1, -1, -1),
@@ -109,20 +109,20 @@ class Board:
             return True if pos in black_promote else False
 
     def check_winner(self):
-        stones = {'White':0, 'Black':0 }
+        stones = {'White': 0, 'Black': 0}
         for x, line in enumerate(self.board):
             for y, stone in enumerate(line):
                 if isinstance(stone, Stone):
                     stones[stone.color] += 1
-        
+
         if stones['White'] == 0:
             return True, 'Black'
         elif stones['Black'] == 0:
             return True, 'White'
         else:
             return False, None
-    
-    
+
+
 class Stone:
     def __init__(self, color=None, stone_type=None):
         self.name = "Stone"
@@ -141,8 +141,42 @@ class Placeholder:
         return f' {self.name}'
 
 
-# class Game:...
+class Game:
+    games = set()
+    horizontal = ('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h')
+    wertical = tuple(range(1, 9))
+
+    def __init__(self, ID=None):
+        self.ID = ID
+        self.board = Board()
+
+    def decode_move(self, move):
+        if self.validate_input(move):
+            move_dict = {}
+            for x, n_x in zip(self.horizontal, range(8)):
+                for y, n_y in zip(self.wertical, range(8)):
+                    move_dict[(x, y)] = (n_x, n_y)
+            return True
+        else:
+            return ValueError('Invalid move')
+
+    def validate_input(self, _input: str):
+        if ',' in _input:
+            pos_1, pos_2, *_ = _input.split(',')
+            if len(pos_1) == 2 and len(pos_2) == 2:
+                return pos_1[0] and pos_2[0] in self.horizontal and \
+                    pos_1[1] and pos_2[1] in str(self.wertical)
+        return False
+
+
+g = Game()
 b = Board()
+
+b.draw_board()
+print(g.decode_move('a,b8'))
+
+
+'''
 b.board[2][4] = Stone('black')
 # b.board[4][4] = Stone('white')
 
@@ -152,7 +186,6 @@ for (x, y) in moves.keys():
 # b.board[2][4] = Stone('black')
 
 
-b.draw_board()
 print(b.check_winner())
 # pprint(moves)
 
@@ -162,3 +195,4 @@ print(b.check_winner())
 
 # s = Stone('b', 'q')
 # print(s)
+'''
