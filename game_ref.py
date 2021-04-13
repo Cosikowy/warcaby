@@ -7,7 +7,7 @@ class Board:
         self.player_1 = p1
         self.player_2 = p2
         self.players = (self.player_1, self.player_2)
-
+        self.turn = 'white'
         self.white_starting_pos = (
             (0, 2), (2, 2), (4, 2), (6, 2),
             (1, 1), (3, 1), (5, 1), (7, 1),
@@ -74,8 +74,12 @@ class Board:
 
     def move(self, old_pos, new_pos):
         x, y, new_x, new_y = old_pos[0], old_pos[1], new_pos[0], new_pos[1]
-        self.board[x][y], self.board[new_x][new_y] =\
+        if self.validate_move(old_pos, new_pos):
+            self.board[x][y], self.board[new_x][new_y] =\
             Placeholder(), self.board[x][y]
+            return True
+        else:
+            return False
 
     def validate_move(self, old_pos, new_pos):
         move_list = self.move_list(old_pos)
@@ -95,7 +99,7 @@ class Board:
             else:
                 return y - new_y > 2
 
-        return True
+
 
     def check_for_promote(self, pos):
         stone = self.board[pos[0]][pos[1]]
@@ -134,7 +138,7 @@ class Stone:
 
 
 class Placeholder:
-    def __init__(self, name='x'):
+    def __init__(self, name=' '):
         self.name = name
 
     def __repr__(self):
@@ -142,18 +146,20 @@ class Placeholder:
 
 
 # class Game:...
+
 b = Board()
-b.board[2][4] = Stone('black')
+# b.board[2][4] = Stone('black')
 # b.board[4][4] = Stone('white')
+
 
 moves = b.move_list((3, 3))
 for (x, y) in moves.keys():
     b.board[x][y] = Placeholder(f'{moves[(x,y)][0]}')
+
+
 # b.board[2][4] = Stone('black')
-
-
 b.draw_board()
-print(b.check_winner())
+
 # pprint(moves)
 
 
